@@ -2,13 +2,13 @@
 
 ![agentek-logo-1](https://github.com/user-attachments/assets/c73ccd7b-4c4e-4c90-8ccc-1ed101fa1b0b)
 
-An extensible TypeScript toolkit for EVM blockchain interactions. 165 composable tools covering on-chain actions, DeFi protocols, market data, and off-chain services — designed for AI agents, MCP clients, and developers.
+An extensible TypeScript toolkit for EVM and Solana blockchain interactions. 178 composable tools covering on-chain actions, DeFi protocols, market data, and off-chain services — designed for AI agents, MCP clients, and developers.
 
 ## Quick Start
 
 **CLI** (fastest way to try it):
 ```bash
-npx @agentek/cli list          # browse all 165 tools
+npx @agentek/cli list          # browse all 178 tools
 npx @agentek/cli info getBalance  # inspect a specific tool
 npx @agentek/cli exec getBalance '{"chainId":1,"address":"vitalik.eth"}'
 ```
@@ -27,7 +27,7 @@ pnpm add @agentek/tools
 
 | Package | Description | Version |
 |---------|-------------|---------|
-| [`@agentek/tools`](packages/shared) | Core toolkit — all 165 tools | 0.1.26 |
+| [`@agentek/tools`](packages/shared) | Core toolkit — all 178 tools | 0.1.26 |
 | [`@agentek/ai-sdk`](packages/ai-sdk) | Vercel AI SDK integration | 0.1.26 |
 | [`@agentek/mcp-server`](packages/mcp) | Model Context Protocol server | 0.1.26 |
 | [`@agentek/cli`](packages/cli) | Command-line interface | 0.0.2 |
@@ -139,7 +139,7 @@ See the [CLI Guide](packages/cli/GUIDE.md) for complete documentation.
 
 ### Composing a custom tool set
 
-You don't have to use all 165 tools. Import only what you need:
+You don't have to use all 178 tools. Import only what you need:
 
 ```typescript
 import { rpcTools, erc20Tools, defillamaTools } from '@agentek/tools';
@@ -151,7 +151,7 @@ const tools = [
 ];
 ```
 
-## Tools (165 total)
+## Tools (178 total)
 
 ### Blockchain Core
 
@@ -225,13 +225,69 @@ const tools = [
 | **btc-rpc** | 4 | `getBtcAddressInfo`, `getBtcTxDetails`, `getBtcBlockTxids`, `getLatestBtcBlock` |
 | **think** | 1 | Reasoning step for multi-step agent workflows |
 
+### Solana
+
+| Module | Tools | Description |
+|--------|-------|-------------|
+| **solana** | 12 | `getSolBalance`, `getSolanaAccountInfo`, `getSolanaTokenBalances`, `getSolanaTokenBalance`, `getSolanaTokenSupply`, `getSolanaTransaction`, `getSolanaTransactionHistory`, `getSolanaBlock`, `getSolanaNetworkStatus`, `getSolanaPriorityFees`, `intentTransferSol`, `intentTransferSplToken` |
+
 ## Supported Networks
+
+**EVM**
 
 - Ethereum Mainnet
 - Optimism
 - Arbitrum
 - Polygon
 - Base
+
+**Solana**
+
+- Mainnet-beta by default; any cluster via `SOLANA_RPC_URL` or a tool's `rpcUrl` parameter.
+
+## Solana
+
+Solana tools sit alongside the EVM ones and share the same client. Reads work
+with no configuration at all. Writes need a key, which lives in its own
+`solana` config block because Solana uses ed25519 keys rather than secp256k1:
+
+```typescript
+import { createAgentekClient, allTools } from '@agentek/tools';
+
+const client = createAgentekClient({
+  accountOrAddress: '0x...',
+  chains: [mainnet],
+  transports: [http()],
+  tools: await allTools({}),
+  solana: {
+    // A base58 secret key (Phantom export), a JSON byte array
+    // (solana-keygen), or the raw 64 bytes.
+    privateKey: process.env.SOLANA_PRIVATE_KEY,
+    rpcUrl: process.env.SOLANA_RPC_URL,
+  },
+});
+
+await client.execute('getSolBalance', {
+  address: '5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9',
+});
+```
+
+Solana intent tools mirror the EVM ones: with a key configured they sign,
+submit and confirm, returning the signature. Without one, pass
+`solana.address` instead and they return the unsigned transaction as base64
+for you to sign elsewhere:
+
+```json
+{
+  "intent": "send 0.25 SOL to 5tzFki...",
+  "chain": "solana",
+  "transaction": "AQAAAAAA...",
+  "signature": "4pF2s..."
+}
+```
+
+The public mainnet-beta endpoint is heavily rate limited — set
+`SOLANA_RPC_URL` to your own endpoint for anything beyond casual use.
 
 ## Environment Variables
 
@@ -241,6 +297,9 @@ Most tools work without any API keys. Optional keys unlock additional features:
 |----------|-------------|
 | `PRIVATE_KEY` | Executing transactions (intent tools) |
 | `ACCOUNT` | Read-only address context (alternative to PRIVATE_KEY) |
+| `SOLANA_PRIVATE_KEY` | Signing Solana transactions (base58 or JSON byte array) |
+| `SOLANA_ACCOUNT` | Read-only Solana address (alternative to SOLANA_PRIVATE_KEY) |
+| `SOLANA_RPC_URL` | Solana JSON-RPC endpoint (defaults to public mainnet-beta) |
 | `PERPLEXITY_API_KEY` | AI-powered search |
 | `ZEROX_API_KEY` | Token swaps via 0x |
 | `TALLY_API_KEY` | Governance data |

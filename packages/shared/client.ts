@@ -13,6 +13,14 @@ import {
   TypedDataDomain
 } from "viem";
 import { z } from "zod";
+import type {
+  Connection,
+  Keypair,
+  TransactionInstruction,
+  VersionedTransaction,
+} from "@solana/web3.js";
+import { DEFAULT_SOLANA_RPC_URL } from "./solana/constants.js";
+import { decodeBase58 } from "./solana/base58.js";
 
 // Base interface for all tools
 export interface BaseTool {
@@ -68,11 +76,55 @@ interface CompletedIntent {
 
 export type Intent = RequestIntent | CompletedIntent;
 
+/**
+ * Solana settings. Read tools work without any of this; writes need
+ * `privateKey`, and `address` alone gives a watch-only account.
+ */
+export interface SolanaConfig {
+  /** JSON-RPC endpoint. Falls back to SOLANA_RPC_URL, then the public mainnet-beta endpoint. */
+  rpcUrl?: string;
+  /**
+   * Signer secret key in any of the shapes wallets export it: a base58 string
+   * (Phantom), a JSON byte array (solana-keygen), or the raw 64 bytes.
+   */
+  privateKey?: string | number[] | Uint8Array;
+  /** Base58 public key to act as, when no privateKey is configured. */
+  address?: string;
+}
+
+/**
+ * Solana counterpart to Intent. Solana has no numeric chain id and no
+ * target/value/calldata model, so intents carry the compiled transaction.
+ */
+export interface SolanaIntent {
+  intent: string;
+  chain: "solana";
+  /** Base64 v0 transaction — unsigned when agentek holds no key, so you can sign it yourself. */
+  transaction: string;
+  /** Present once agentek signed and submitted the transaction. */
+  signature?: string;
+}
+
+/** Accepts base58, a JSON byte array, or raw bytes. */
+function toSolanaSecretKey(
+  privateKey: string | number[] | Uint8Array,
+): Uint8Array {
+  if (privateKey instanceof Uint8Array) return privateKey;
+  if (Array.isArray(privateKey)) return Uint8Array.from(privateKey);
+
+  const trimmed = privateKey.trim();
+  if (trimmed.startsWith("[")) {
+    return Uint8Array.from(JSON.parse(trimmed) as number[]);
+  }
+  return decodeBase58(trimmed);
+}
+
 export interface AgentekClientConfig {
   transports: Transport[];
   chains: Chain[];
   accountOrAddress: Account | Address;
   tools: BaseTool[];
+  solana?: SolanaConfig;
 }
 
 // Type guards for runtime checking
@@ -98,12 +150,16 @@ export class AgentekClient {
   private tools: Map<string, BaseTool>;
   private chains: Chain[];
   private accountOrAddress: Account | Address;
+  private solanaConfig?: SolanaConfig;
+  private solanaConnection?: Connection;
+  private solanaKeypair?: Keypair;
 
   constructor(config: AgentekClientConfig) {
     this.publicClients = new Map();
     this.walletClients = new Map();
     this.chains = config.chains;
     this.accountOrAddress = config.accountOrAddress;
+    this.solanaConfig = config.solana;
 
     config.chains.forEach((chain, index) => {
       const transport = config.transports[index] || config.transports[0];
@@ -304,6 +360,116 @@ export class AgentekClient {
     }
 
     return results;
+  }
+
+  // ── Solana ───────────────────────────────────────────────────────────
+  // Solana sits alongside the viem clients rather than inside them: different
+  // key type (ed25519), different transaction model, no chain id. The SDK is
+  // imported lazily so EVM-only consumers don't pay for it at startup.
+
+  public getSolanaRpcUrl(): string {
+    if (this.solanaConfig?.rpcUrl) return this.solanaConfig.rpcUrl;
+    const fromEnv =
+      typeof process !== "undefined" ? process.env?.SOLANA_RPC_URL : undefined;
+    return fromEnv || DEFAULT_SOLANA_RPC_URL;
+  }
+
+  public async getSolanaConnection(): Promise<Connection> {
+    if (!this.solanaConnection) {
+      const { Connection } = await import("@solana/web3.js");
+      this.solanaConnection = new Connection(
+        this.getSolanaRpcUrl(),
+        "confirmed",
+      );
+    }
+    return this.solanaConnection;
+  }
+
+  /** The Solana signer, or undefined when the client is watch-only. */
+  public async getSolanaKeypair(): Promise<Keypair | undefined> {
+    if (this.solanaKeypair) return this.solanaKeypair;
+
+    const privateKey = this.solanaConfig?.privateKey;
+    if (!privateKey) return undefined;
+
+    const { Keypair } = await import("@solana/web3.js");
+    this.solanaKeypair = Keypair.fromSecretKey(toSolanaSecretKey(privateKey));
+    return this.solanaKeypair;
+  }
+
+  /** Base58 address of the configured Solana signer, or of the watched account. */
+  public async getSolanaAddress(): Promise<string> {
+    const keypair = await this.getSolanaKeypair();
+    if (keypair) return keypair.publicKey.toBase58();
+    if (this.solanaConfig?.address) return this.solanaConfig.address;
+
+    throw new Error(
+      "No Solana account configured - pass solana.privateKey to sign transactions, or solana.address for read-only access",
+    );
+  }
+
+  /** Compile instructions into an unsigned v0 transaction paid for by the configured account. */
+  public async buildSolanaTransaction(
+    instructions: TransactionInstruction[],
+  ): Promise<{
+    transaction: VersionedTransaction;
+    blockhash: string;
+    lastValidBlockHeight: number;
+  }> {
+    const { PublicKey, TransactionMessage, VersionedTransaction } =
+      await import("@solana/web3.js");
+
+    const connection = await this.getSolanaConnection();
+    const payerKey = new PublicKey(await this.getSolanaAddress());
+    const { blockhash, lastValidBlockHeight } =
+      await connection.getLatestBlockhash();
+
+    const message = new TransactionMessage({
+      payerKey,
+      recentBlockhash: blockhash,
+      instructions,
+    }).compileToV0Message();
+
+    return {
+      transaction: new VersionedTransaction(message),
+      blockhash,
+      lastValidBlockHeight,
+    };
+  }
+
+  /** Sign, submit and confirm a Solana transaction. Throws when the client is watch-only. */
+  public async executeSolanaTransaction(
+    transaction: VersionedTransaction,
+    blockhash: string,
+    lastValidBlockHeight: number,
+  ): Promise<string> {
+    const keypair = await this.getSolanaKeypair();
+    if (!keypair) {
+      throw new Error(
+        "No Solana signer available - pass solana.privateKey to send transactions",
+      );
+    }
+
+    const connection = await this.getSolanaConnection();
+    transaction.sign([keypair]);
+
+    const signature = await connection.sendRawTransaction(
+      transaction.serialize(),
+      { maxRetries: 3 },
+    );
+
+    const confirmation = await connection.confirmTransaction(
+      { signature, blockhash, lastValidBlockHeight },
+      "confirmed",
+    );
+
+    if (confirmation.value.err) {
+      throw new Error(
+        `Solana transaction ${signature} failed: ${JSON.stringify(confirmation.value.err)}`,
+      );
+    }
+
+    return signature;
   }
 
   public async execute(method: string, args: any): Promise<any> {

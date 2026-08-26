@@ -12,6 +12,9 @@ export interface KnownKey {
 export const KNOWN_KEYS: KnownKey[] = [
   { name: "PRIVATE_KEY", description: "Hex-encoded private key for signing transactions" },
   { name: "ACCOUNT", description: "Hex address to use as the sender (read-only)" },
+  { name: "SOLANA_PRIVATE_KEY", description: "Base58 or JSON-array Solana secret key for signing Solana transactions" },
+  { name: "SOLANA_ACCOUNT", description: "Base58 Solana address to use as the sender (read-only)" },
+  { name: "SOLANA_RPC_URL", description: "Solana JSON-RPC endpoint (defaults to the public mainnet-beta endpoint)" },
   { name: "PERPLEXITY_API_KEY", description: "Perplexity AI search tools" },
   { name: "ZEROX_API_KEY", description: "0x swap/quote tools" },
   { name: "TALLY_API_KEY", description: "Tally governance tools" },

@@ -32,6 +32,9 @@ async function main() {
   // ── Environment ──────────────────────────────────────────────────────
   const PRIVATE_KEY = process.env.PRIVATE_KEY;
   const ACCOUNT = process.env.ACCOUNT;
+  const SOLANA_PRIVATE_KEY = process.env.SOLANA_PRIVATE_KEY;
+  const SOLANA_ACCOUNT = process.env.SOLANA_ACCOUNT;
+  const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL;
   const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
   const ZEROX_API_KEY = process.env.ZEROX_API_KEY;
   const TALLY_API_KEY = process.env.TALLY_API_KEY;
@@ -59,6 +62,11 @@ async function main() {
     transports,
     chains,
     accountOrAddress: account,
+    solana: {
+      rpcUrl: SOLANA_RPC_URL,
+      privateKey: SOLANA_PRIVATE_KEY,
+      address: SOLANA_ACCOUNT,
+    },
     tools: await allTools({
       perplexityApiKey: PERPLEXITY_API_KEY,
       zeroxApiKey: ZEROX_API_KEY,

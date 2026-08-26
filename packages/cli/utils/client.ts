@@ -12,6 +12,9 @@ export async function createClientFromEnv() {
   const keys = resolveKeys();
   const PRIVATE_KEY = keys.PRIVATE_KEY;
   const ACCOUNT = keys.ACCOUNT;
+  const SOLANA_PRIVATE_KEY = keys.SOLANA_PRIVATE_KEY;
+  const SOLANA_ACCOUNT = keys.SOLANA_ACCOUNT;
+  const SOLANA_RPC_URL = keys.SOLANA_RPC_URL;
   const PERPLEXITY_API_KEY = keys.PERPLEXITY_API_KEY;
   const ZEROX_API_KEY = keys.ZEROX_API_KEY;
   const TALLY_API_KEY = keys.TALLY_API_KEY;
@@ -50,6 +53,11 @@ export async function createClientFromEnv() {
     transports,
     chains,
     accountOrAddress: account,
+    solana: {
+      rpcUrl: SOLANA_RPC_URL,
+      privateKey: SOLANA_PRIVATE_KEY,
+      address: SOLANA_ACCOUNT,
+    },
     tools: await allTools({
       perplexityApiKey: PERPLEXITY_API_KEY,
       zeroxApiKey: ZEROX_API_KEY,
