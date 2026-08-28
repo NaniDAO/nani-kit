@@ -2,13 +2,13 @@
 
 ![agentek-logo-1](https://github.com/user-attachments/assets/c73ccd7b-4c4e-4c90-8ccc-1ed101fa1b0b)
 
-An extensible TypeScript toolkit for EVM and Solana blockchain interactions. 178 composable tools covering on-chain actions, DeFi protocols, market data, and off-chain services — designed for AI agents, MCP clients, and developers.
+An extensible TypeScript toolkit for EVM and Solana blockchain interactions. 177 composable tools covering on-chain actions, DeFi protocols, market data, and off-chain services — designed for AI agents, MCP clients, and developers.
 
 ## Quick Start
 
 **CLI** (fastest way to try it):
 ```bash
-npx @agentek/cli list          # browse all 178 tools
+npx @agentek/cli list          # browse up to 177 tools
 npx @agentek/cli info getBalance  # inspect a specific tool
 npx @agentek/cli exec getBalance '{"chainId":1,"address":"vitalik.eth"}'
 ```
@@ -27,7 +27,7 @@ pnpm add @agentek/tools
 
 | Package | Description | Version |
 |---------|-------------|---------|
-| [`@agentek/tools`](packages/shared) | Core toolkit — all 178 tools | 0.1.26 |
+| [`@agentek/tools`](packages/shared) | Core toolkit — up to 177 tools | 0.1.26 |
 | [`@agentek/ai-sdk`](packages/ai-sdk) | Vercel AI SDK integration | 0.1.26 |
 | [`@agentek/mcp-server`](packages/mcp) | Model Context Protocol server | 0.1.26 |
 | [`@agentek/cli`](packages/cli) | Command-line interface | 0.0.2 |
@@ -139,7 +139,7 @@ See the [CLI Guide](packages/cli/GUIDE.md) for complete documentation.
 
 ### Composing a custom tool set
 
-You don't have to use all 178 tools. Import only what you need:
+You don't have to use all 177 tools. Import only what you need:
 
 ```typescript
 import { rpcTools, erc20Tools, defillamaTools } from '@agentek/tools';
@@ -151,7 +151,7 @@ const tools = [
 ];
 ```
 
-## Tools (178 total)
+## Tools (177 total)
 
 ### Blockchain Core
 
@@ -229,7 +229,7 @@ const tools = [
 
 | Module | Tools | Description |
 |--------|-------|-------------|
-| **solana** | 12 | `getSolBalance`, `getSolanaAccountInfo`, `getSolanaTokenBalances`, `getSolanaTokenBalance`, `getSolanaTokenSupply`, `getSolanaTransaction`, `getSolanaTransactionHistory`, `getSolanaBlock`, `getSolanaNetworkStatus`, `getSolanaPriorityFees`, `intentTransferSol`, `intentTransferSplToken` |
+| **solana** | 21 | `getSolBalance`, `getSolanaAccountInfo`, `getSolanaTokenBalances`, `getSolanaTokenBalance`, `getSolanaTokenSupply`, `getSolanaTransaction`, `getSolanaTransactionHistory`, `getSolanaBlock`, `getSolanaNetworkStatus`, `getSolanaPriorityFees`, `intentTransferSol`, `intentTransferSplToken`, `searchSolanaTokens`, `getSolanaTrendingTokens`, `getSolanaRecentTokens`, `getSolanaTokenMarketData`, `getSolanaLatestProfiles`, `getSolanaPromotedTokens`, `getSolanaTokenPairs`, `getSolanaSwapQuote`, `intentSwapSolana` |
 
 ## Supported Networks
 
@@ -264,6 +264,7 @@ const client = createAgentekClient({
     // (solana-keygen), or the raw 64 bytes.
     privateKey: process.env.SOLANA_PRIVATE_KEY,
     rpcUrl: process.env.SOLANA_RPC_URL,
+    jupiterApiKey: process.env.JUPITER_API_KEY,
   },
 });
 
@@ -272,10 +273,13 @@ await client.execute('getSolBalance', {
 });
 ```
 
-Solana intent tools mirror the EVM ones: with a key configured they sign,
-submit and confirm, returning the signature. Without one, pass
+SOL and SPL transfer intent tools mirror the EVM ones: with a key configured
+they sign, submit and confirm, returning the signature. Without one, pass
 `solana.address` instead and they return the unsigned transaction as base64
-for you to sign elsewhere:
+for you to sign elsewhere. `intentSwapSolana` always returns Jupiter's
+untrusted transaction and request ID for an external wallet to decode,
+validate, simulate, approve, sign, and execute; agentek never signs or submits
+a Jupiter swap intent:
 
 ```json
 {
@@ -300,6 +304,7 @@ Most tools work without any API keys. Optional keys unlock additional features:
 | `SOLANA_PRIVATE_KEY` | Signing Solana transactions (base58 or JSON byte array) |
 | `SOLANA_ACCOUNT` | Read-only Solana address (alternative to SOLANA_PRIVATE_KEY) |
 | `SOLANA_RPC_URL` | Solana JSON-RPC endpoint (defaults to public mainnet-beta) |
+| `JUPITER_API_KEY` | Higher Jupiter Tokens V2 and Swap V2 rate limits and analytics (keyless access is supported) |
 | `PERPLEXITY_API_KEY` | AI-powered search |
 | `ZEROX_API_KEY` | Token swaps via 0x |
 | `TALLY_API_KEY` | Governance data |

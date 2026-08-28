@@ -90,6 +90,8 @@ export interface SolanaConfig {
   privateKey?: string | number[] | Uint8Array;
   /** Base58 public key to act as, when no privateKey is configured. */
   address?: string;
+  /** Jupiter API key for Tokens V2 and Swap V2. Never expose it as a tool argument. */
+  jupiterApiKey?: string;
 }
 
 /**
@@ -372,6 +374,14 @@ export class AgentekClient {
     const fromEnv =
       typeof process !== "undefined" ? process.env?.SOLANA_RPC_URL : undefined;
     return fromEnv || DEFAULT_SOLANA_RPC_URL;
+  }
+
+  /** Jupiter credentials stay in client configuration, outside model-visible schemas. */
+  public getJupiterApiKey(): string | undefined {
+    if (this.solanaConfig?.jupiterApiKey) return this.solanaConfig.jupiterApiKey;
+    return typeof process !== "undefined"
+      ? process.env?.JUPITER_API_KEY
+      : undefined;
   }
 
   public async getSolanaConnection(): Promise<Connection> {

@@ -61,6 +61,7 @@ Below is every key the CLI recognizes, grouped by the tools they unlock.
 | `SOLANA_PRIVATE_KEY` | Solana secret key for signing Solana transactions | Export from your wallet (Phantom: Settings > Export Private Key) as base58, or use the JSON array `solana-keygen` writes. **Never share this key.** |
 | `SOLANA_ACCOUNT` | Base58 Solana address for read-only sender context | Your Solana public address. Use this instead of `SOLANA_PRIVATE_KEY` if you only need read operations. |
 | `SOLANA_RPC_URL` | Solana JSON-RPC endpoint | Defaults to the public mainnet-beta endpoint, which is heavily rate limited. Point it at your own endpoint for real use. |
+| `JUPITER_API_KEY` | Optional Jupiter Tokens V2 and Swap V2 API key | Keyless requests use Jupiter's prototype rate limit. Configure a portal key for higher production limits and analytics; it stays outside tool arguments. |
 
 **Security note:** If you only need to read data (balances, prices, ENS lookups), you do not need `PRIVATE_KEY`. Set `ACCOUNT` to your public address instead. Only configure `PRIVATE_KEY` when you need to sign and send transactions (swaps, transfers, approvals).
 

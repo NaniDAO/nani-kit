@@ -35,6 +35,7 @@ async function main() {
   const SOLANA_PRIVATE_KEY = process.env.SOLANA_PRIVATE_KEY;
   const SOLANA_ACCOUNT = process.env.SOLANA_ACCOUNT;
   const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL;
+  const JUPITER_API_KEY = process.env.JUPITER_API_KEY;
   const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
   const ZEROX_API_KEY = process.env.ZEROX_API_KEY;
   const TALLY_API_KEY = process.env.TALLY_API_KEY;
@@ -66,6 +67,7 @@ async function main() {
       rpcUrl: SOLANA_RPC_URL,
       privateKey: SOLANA_PRIVATE_KEY,
       address: SOLANA_ACCOUNT,
+      jupiterApiKey: JUPITER_API_KEY,
     },
     tools: await allTools({
       perplexityApiKey: PERPLEXITY_API_KEY,

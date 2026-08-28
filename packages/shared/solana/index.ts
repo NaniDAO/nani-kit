@@ -15,8 +15,11 @@ import {
   intentTransferSolTool,
   intentTransferSplTokenTool,
 } from "./intents.js";
+import { solanaMarketTools } from "./market-tools.js";
 
-export function solanaTools(): BaseTool[] {
+export function solanaTools(
+  options: { includeJupiter?: boolean } = { includeJupiter: true },
+): BaseTool[] {
   return createToolCollection([
     getSolBalanceTool,
     getSolanaAccountInfoTool,
@@ -30,12 +33,27 @@ export function solanaTools(): BaseTool[] {
     getSolanaPriorityFeesTool,
     intentTransferSolTool,
     intentTransferSplTokenTool,
+    ...solanaMarketTools(options),
   ]);
 }
 
 export * from "./constants.js";
 export { decodeBase58, encodeBase58 } from "./base58.js";
 export { solanaRpc } from "./rpc.js";
+export {
+  DEXSCREENER_API_BASE_URL,
+  JUPITER_API_BASE_URL,
+  getDexscreenerSolanaPairs,
+  getDexscreenerSolanaProfiles,
+  getDexscreenerSolanaPromotions,
+  getJupiterRecentTokens,
+  getJupiterSwapOrder,
+  getJupiterTokenByMint,
+  getJupiterTopTokens,
+  resolveSolanaSwapMint,
+  searchJupiterTokens,
+} from "./market.js";
+export { solanaMarketTools } from "./market-tools.js";
 export {
   formatLamports,
   resolveSolanaMint,
