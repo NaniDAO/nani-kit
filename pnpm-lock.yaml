@@ -135,6 +135,24 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@22.14.1)
 
+  packages/nani:
+    dependencies:
+      '@agentek/tools':
+        specifier: workspace:*
+        version: link:../shared
+      viem:
+        specifier: 2.33.2
+        version: 2.33.2(bufferutil@4.1.0)(typescript@5.9.2)(utf-8-validate@6.0.6)(zod@3.25.76)
+      zod:
+        specifier: 3.25.76
+        version: 3.25.76
+      zod-to-json-schema:
+        specifier: 3.25.1
+        version: 3.25.1(zod@3.25.76)
+      zrouter-sdk:
+        specifier: 0.0.27
+        version: 0.0.27(viem@2.33.2(bufferutil@4.1.0)(typescript@5.9.2)(utf-8-validate@6.0.6)(zod@3.25.76))
+
   packages/shared:
     dependencies:
       '@solana/spl-token':

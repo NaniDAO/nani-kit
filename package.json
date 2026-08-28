@@ -7,7 +7,8 @@
     "packages/ai-sdk",
     "packages/shared",
     "packages/mcp",
-    "packages/cli"
+    "packages/cli",
+    "packages/nani"
   ],
   "scripts": {
     "build": "pnpm -r build",

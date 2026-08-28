@@ -1,0 +1,19 @@
+{
+  "name": "@agentek/nani",
+  "version": "0.1.0",
+  "description": "JavaScriptCore tool bundle for nani-macos",
+  "license": "AGPL-3.0",
+  "author": "NaniDAO",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun build --minify jsc-entry.ts --outfile dist/nani-tools.js"
+  },
+  "dependencies": {
+    "@agentek/tools": "workspace:*",
+    "viem": "2.33.2",
+    "zod": "3.25.76",
+    "zod-to-json-schema": "3.25.1",
+    "zrouter-sdk": "0.0.27"
+  }
+}
