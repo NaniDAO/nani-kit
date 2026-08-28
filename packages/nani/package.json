@@ -7,7 +7,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "bun build --minify jsc-entry.ts --outfile dist/nani-tools.js"
+    "build": "bun build --minify --external @solana/web3.js --external @solana/spl-token jsc-entry.ts --outfile dist/nani-tools.js"
   },
   "dependencies": {
     "@agentek/tools": "workspace:*",
