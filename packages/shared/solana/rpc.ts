@@ -75,6 +75,10 @@ export async function solanaRpc<T = any>(
 ): Promise<T> {
   const response = await fetch(rpcUrl, {
     method: "POST",
+    // RPC state is only trusted from the endpoint the user configured. Do not
+    // let a redirect silently substitute a different node or receive a URL
+    // credential embedded in a private provider endpoint.
+    redirect: "error",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: ++requestId, method, params }),
   });

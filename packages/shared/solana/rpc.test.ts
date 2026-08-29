@@ -1,5 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { quoteUnsafeIntegers } from "./rpc.js";
+import { afterEach, describe, it, expect, vi } from "vitest";
+import { quoteUnsafeIntegers, solanaRpc } from "./rpc.js";
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("quoteUnsafeIntegers", () => {
   const roundTrip = (json: string) => JSON.parse(quoteUnsafeIntegers(json));
@@ -53,5 +55,23 @@ describe("quoteUnsafeIntegers", () => {
       "18446744073709551615",
       3,
     ]);
+  });
+});
+
+describe("solanaRpc", () => {
+  it("refuses HTTP redirects from the exact configured endpoint", async () => {
+    const fetcher = vi.fn(async (
+      _input: string | URL | Request,
+      init?: RequestInit,
+    ) => {
+      expect(init?.redirect).toBe("error");
+      return new Response('{"jsonrpc":"2.0","result":{"ok":true},"id":1}');
+    });
+    vi.stubGlobal("fetch", fetcher);
+
+    await expect(solanaRpc("https://rpc.example", "getHealth")).resolves.toEqual({
+      ok: true,
+    });
+    expect(fetcher).toHaveBeenCalledOnce();
   });
 });
