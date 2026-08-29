@@ -58,6 +58,7 @@ describe("Solana market clients", () => {
       expect(url.pathname).toBe("/tokens/v2/search");
       expect(url.searchParams.get("query")).toBe("BONK token");
       expect((init?.headers as Record<string, string>)["x-api-key"]).toBe("key-1");
+      expect(init?.redirect).toBe("error");
       return jsonResponse([{ id: SOLANA_TOKENS.BONK, symbol: "BONK" }]);
     });
 
@@ -76,6 +77,20 @@ describe("Solana market clients", () => {
     });
     await expect(searchJupiterTokens("BONK", undefined, fetcher)).resolves.toEqual([]);
     expect(fetcher).toHaveBeenCalledOnce();
+  });
+
+  it("rejects redirects for every provider request", async () => {
+    const fetcher = vi.fn(async (
+      _input: string | URL | Request,
+      init?: RequestInit,
+    ) => {
+      expect(init?.redirect).toBe("error");
+      return jsonResponse([]);
+    });
+
+    await searchJupiterTokens("BONK", "key-1", fetcher);
+    await getDexscreenerSolanaProfiles(1, fetcher);
+    expect(fetcher).toHaveBeenCalledTimes(2);
   });
 
   it("builds the documented Jupiter category and interval path", async () => {

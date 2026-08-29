@@ -52,7 +52,10 @@ const getJSON = async (
   const key = apiKey?.trim();
   if (key) headers["x-api-key"] = key;
 
-  const response = await fetcher(url, { headers });
+  // These clients only need the exact, pinned provider origin. Refuse redirects
+  // so a compromised or misconfigured provider cannot move a credentialed
+  // request (or its trust decision) to a different endpoint.
+  const response = await fetcher(url, { headers, redirect: "error" });
   await assertOkResponse(response, context);
   return response.json();
 };
