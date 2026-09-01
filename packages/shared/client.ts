@@ -20,7 +20,41 @@ import type {
   VersionedTransaction,
 } from "@solana/web3.js";
 import { DEFAULT_SOLANA_RPC_URL } from "./solana/constants.js";
-import { decodeBase58 } from "./solana/base58.js";
+import { decodeBase58, encodeBase58 } from "./solana/base58.js";
+
+const SOLANA_RPC_OUTCOME_TIMEOUT_MS = 120_000;
+
+type RpcStageResult<T> =
+  | { kind: "value"; value: T }
+  | { kind: "error"; error: unknown }
+  | { kind: "timeout" };
+
+/**
+ * Bound an RPC stage without pretending cancellation occurred. The underlying
+ * request may still finish, so callers receive the locally-derived signature
+ * and an explicit ambiguous status rather than a retryable timeout error.
+ */
+async function awaitSolanaRpcStage<T>(
+  promise: Promise<T>,
+  timeoutMs = SOLANA_RPC_OUTCOME_TIMEOUT_MS,
+): Promise<RpcStageResult<T>> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<RpcStageResult<T>>((resolve) => {
+    timer = setTimeout(
+      () => resolve({ kind: "timeout" }),
+      timeoutMs,
+    );
+  });
+  const outcome: Promise<RpcStageResult<T>> = promise.then(
+    (value): RpcStageResult<T> => ({ kind: "value", value }),
+    (error): RpcStageResult<T> => ({ kind: "error", error }),
+  );
+  try {
+    return await Promise.race([outcome, timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 // Base interface for all tools
 export interface BaseTool {
@@ -105,6 +139,21 @@ export interface SolanaIntent {
   transaction: string;
   /** Present once agentek signed and submitted the transaction. */
   signature?: string;
+  /**
+   * `confirmed` is final for the requested commitment. `submitted` means the
+   * RPC accepted the transaction but confirmation could not be observed.
+   * `unknown` means submission itself returned ambiguously. Never rebuild and
+   * retry the latter two statuses before reconciling `signature` on-chain.
+   */
+  confirmationStatus?: SolanaConfirmationStatus;
+}
+
+export type SolanaConfirmationStatus = "confirmed" | "submitted" | "unknown";
+
+export interface SolanaExecutionResult {
+  /** Derived locally from the signed transaction, so it survives RPC errors. */
+  signature: string;
+  confirmationStatus: SolanaConfirmationStatus;
 }
 
 /** Accepts base58, a JSON byte array, or raw bytes. */
@@ -117,6 +166,11 @@ function toSolanaSecretKey(
   const trimmed = privateKey.trim();
   if (trimmed.startsWith("[")) {
     return Uint8Array.from(JSON.parse(trimmed) as number[]);
+  }
+  // A 64-byte ed25519 secret is at most 88 base58 characters. Bound the
+  // attacker-controlled text before the quadratic decoder runs.
+  if (trimmed.length > 88) {
+    throw new Error("Invalid Solana private key - base58 value is too long");
   }
   return decodeBase58(trimmed);
 }
@@ -431,8 +485,10 @@ export class AgentekClient {
 
     const connection = await this.getSolanaConnection();
     const payerKey = new PublicKey(await this.getSolanaAddress());
-    const { blockhash, lastValidBlockHeight } =
-      await connection.getLatestBlockhash();
+    const { blockhash, lastValidBlockHeight } = await this.awaitSolanaPreSubmission(
+      connection.getLatestBlockhash(),
+      "getLatestBlockhash",
+    );
 
     const message = new TransactionMessage({
       payerKey,
@@ -447,12 +503,27 @@ export class AgentekClient {
     };
   }
 
+  /** Bound RPC work before signing, where an ordinary retry is still safe. */
+  public async awaitSolanaPreSubmission<T>(
+    promise: Promise<T>,
+    label: string,
+  ): Promise<T> {
+    const outcome = await awaitSolanaRpcStage(promise);
+    if (outcome.kind === "timeout") {
+      throw new Error(
+        `Solana RPC ${label} timed out before transaction signing; it is safe to retry`,
+      );
+    }
+    if (outcome.kind === "error") throw outcome.error;
+    return outcome.value;
+  }
+
   /** Sign, submit and confirm a Solana transaction. Throws when the client is watch-only. */
   public async executeSolanaTransaction(
     transaction: VersionedTransaction,
     blockhash: string,
     lastValidBlockHeight: number,
-  ): Promise<string> {
+  ): Promise<SolanaExecutionResult> {
     const keypair = await this.getSolanaKeypair();
     if (!keypair) {
       throw new Error(
@@ -463,15 +534,53 @@ export class AgentekClient {
     const connection = await this.getSolanaConnection();
     transaction.sign([keypair]);
 
-    const signature = await connection.sendRawTransaction(
-      transaction.serialize(),
-      { maxRetries: 3 },
-    );
+    // The signature is deterministic and already present locally. Preserve it
+    // across every RPC failure so callers can reconcile instead of rebuilding
+    // with a new blockhash and accidentally paying twice.
+    const signature = encodeBase58(transaction.signatures[0]);
 
-    const confirmation = await connection.confirmTransaction(
-      { signature, blockhash, lastValidBlockHeight },
-      "confirmed",
+    const executionStartedAt = Date.now();
+    const sendOutcome = await awaitSolanaRpcStage(
+      connection.sendRawTransaction(
+        transaction.serialize(),
+        { maxRetries: 3 },
+      ),
     );
+    if (sendOutcome.kind === "timeout") {
+      return { signature, confirmationStatus: "unknown" };
+    }
+    if (sendOutcome.kind === "error") {
+      const { SendTransactionError } = await import("@solana/web3.js");
+      if (sendOutcome.error instanceof SendTransactionError) {
+        // Simulation/preflight rejection is a definitive non-submission and
+        // should remain an actionable error rather than ambiguous success.
+        throw sendOutcome.error;
+      }
+      return { signature, confirmationStatus: "unknown" };
+    }
+    const rpcSignature = sendOutcome.value;
+
+    if (rpcSignature !== signature) {
+      // A conforming RPC returns the transaction's first signature. Treat a
+      // mismatch as an ambiguous submission and retain the locally verifiable
+      // identity rather than trusting RPC-controlled output.
+      return { signature, confirmationStatus: "unknown" };
+    }
+
+    const confirmationOutcome = await awaitSolanaRpcStage(
+      connection.confirmTransaction(
+        { signature, blockhash, lastValidBlockHeight },
+        "confirmed",
+      ),
+      Math.max(
+        1,
+        SOLANA_RPC_OUTCOME_TIMEOUT_MS - (Date.now() - executionStartedAt),
+      ),
+    );
+    if (confirmationOutcome.kind !== "value") {
+      return { signature, confirmationStatus: "submitted" };
+    }
+    const confirmation = confirmationOutcome.value;
 
     if (confirmation.value.err) {
       throw new Error(
@@ -479,7 +588,7 @@ export class AgentekClient {
       );
     }
 
-    return signature;
+    return { signature, confirmationStatus: "confirmed" };
   }
 
   public async execute(method: string, args: any): Promise<any> {

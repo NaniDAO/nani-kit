@@ -64,6 +64,16 @@ describe("solana schemas", () => {
     const signature = encodeBase58(Uint8Array.from({ length: 64 }, (_, i) => i + 1));
     expect(solanaSignatureSchema.parse(signature)).toBe(signature);
   });
+
+  it("rejects oversized values before base58 decoding", () => {
+    // The invalid suffix would otherwise be reached only after processing a
+    // large valid prefix through the decoder's expanding carry loop.
+    expect(() => solanaAddressSchema.parse(`${"1".repeat(100_000)}0`)).toThrow();
+    expect(() => solanaSignatureSchema.parse(`${"1".repeat(100_000)}0`)).toThrow();
+    expect(() => resolveSolanaMint(`${"1".repeat(100_000)}0`)).toThrow(
+      /Invalid token/,
+    );
+  });
 });
 
 describe("resolveSolanaMint", () => {

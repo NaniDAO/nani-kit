@@ -34,9 +34,25 @@ export function parseFlags(argv: string[], schema: z.ZodObject<any>): Record<str
       const jsonStr = inlineValue ?? argv[++i];
       if (jsonStr === undefined) outputError("--json requires a value");
       try {
-        Object.assign(result, JSON.parse(jsonStr));
-      } catch {
-        outputError(`Invalid JSON for --json: ${jsonStr}`);
+        const parsed = JSON.parse(jsonStr);
+        if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+          outputError("--json value must be a JSON object");
+        }
+        for (const parsedKey of Object.keys(parsed)) {
+          if (
+            parsedKey === "__proto__" ||
+            parsedKey === "constructor" ||
+            parsedKey === "prototype"
+          ) {
+            continue;
+          }
+          result[parsedKey] = parsed[parsedKey];
+        }
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          outputError(`Invalid JSON for --json: ${jsonStr}`);
+        }
+        throw error;
       }
       i++;
       continue;

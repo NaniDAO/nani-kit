@@ -55,6 +55,6 @@
     "model-context-protocol"
   ],
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=20.18.1"
   }
 }

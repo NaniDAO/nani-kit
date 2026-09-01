@@ -42,17 +42,35 @@ export function quoteUnsafeIntegers(json: string): string {
       (char === "-" && json[i + 1] >= "0" && json[i + 1] <= "9");
 
     if (isNumberStart) {
-      let end = char === "-" ? i + 1 : i;
+      // Consume the number token whole - integer part, fraction, exponent.
+      // Stopping at the integer part would leave the scan sitting on the ".",
+      // and a long fractional run would then be quoted as if it were its own
+      // integer, producing `0."30000000000000004"` and invalid JSON.
+      const digitsStart = char === "-" ? i + 1 : i;
+      let end = digitsStart;
       while (end < json.length && json[end] >= "0" && json[end] <= "9") end++;
+      const integerEnd = end;
 
-      const literal = json.slice(i, end);
-      const next = json[end];
       // Leave floats and exponents alone - quoting them would change the type
       // of values like uiAmount that callers expect to be numbers.
-      const isInteger = next !== "." && next !== "e" && next !== "E";
-      const magnitude = BigInt(char === "-" ? literal.slice(1) : literal);
+      let isInteger = true;
+      if (json[end] === ".") {
+        isInteger = false;
+        end++;
+        while (end < json.length && json[end] >= "0" && json[end] <= "9") end++;
+      }
+      if (json[end] === "e" || json[end] === "E") {
+        isInteger = false;
+        end++;
+        if (json[end] === "+" || json[end] === "-") end++;
+        while (end < json.length && json[end] >= "0" && json[end] <= "9") end++;
+      }
 
-      out += isInteger && magnitude > MAX_SAFE ? `"${literal}"` : literal;
+      const literal = json.slice(i, end);
+      const exceedsMaxSafe =
+        isInteger && BigInt(json.slice(digitsStart, integerEnd)) > MAX_SAFE;
+
+      out += exceedsMaxSafe ? `"${literal}"` : literal;
       i = end;
       continue;
     }

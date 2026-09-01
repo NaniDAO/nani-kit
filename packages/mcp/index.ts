@@ -11,6 +11,10 @@ const VERSION = "0.1.26";
 
 /** Timeout for individual tool executions (2 minutes). */
 const TOOL_TIMEOUT_MS = 120_000;
+const NON_CANCELLABLE_TOOLS = new Set([
+  "intentTransferSol",
+  "intentTransferSplToken",
+]);
 
 /** stderr logging — safe for stdio transport (never touches stdout). */
 const log = (msg: string) => console.error(`[agentek-mcp] ${msg}`);
@@ -109,11 +113,13 @@ async function main() {
         inputSchema: zodShape,
       },
       async (args) => {
-        const result = await withTimeout(
-          agentekClient.execute(name, args),
-          TOOL_TIMEOUT_MS,
-          name,
-        );
+        const execution = agentekClient.execute(name, args);
+        // A Solana transfer may already be submitted when a wrapper timer
+        // fires. Do not return a retryable-looking timeout for irreversible
+        // operations; their result carries an explicit confirmationStatus.
+        const result = NON_CANCELLABLE_TOOLS.has(name)
+          ? await execution
+          : await withTimeout(execution, TOOL_TIMEOUT_MS, name);
 
         const text = typeof result === "object"
           ? JSON.stringify(result, null, 2)

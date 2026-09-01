@@ -60,11 +60,53 @@ const getJSON = async (
   return response.json();
 };
 
+/**
+ * Anyone can mint a token, which makes every name, symbol and description in
+ * these listings attacker-authored text that reaches the model verbatim.
+ * Strip what lets a value fake structure - control characters and line breaks,
+ * which are how a "name" impersonates tool output or a system message - and
+ * cap the length so one field cannot bury the rest of the response.
+ *
+ * This removes the shape of an injection, not the possibility of one. Provider
+ * listings stay untrusted input: discovery signals to look into, never
+ * instructions and never a safety verdict.
+ */
+const MAX_PROVIDER_STRING = 512;
+
+const sanitizeProviderValue = (value: unknown): unknown => {
+  if (typeof value === "string") {
+    const flattened = value
+      .replace(/[\u0000-\u001f\u007f-\u009f]+/g, " ")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+    return flattened.length > MAX_PROVIDER_STRING
+      ? `${flattened.slice(0, MAX_PROVIDER_STRING)}… [truncated]`
+      : flattened;
+  }
+  if (Array.isArray(value)) return value.map(sanitizeProviderValue);
+  if (isRecord(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        sanitizeProviderValue(entry),
+      ]),
+    );
+  }
+  return value;
+};
+
+/**
+ * Every listing endpoint funnels through here, so it is also where provider
+ * text gets sanitized. Deliberately not applied to the swap order, whose
+ * base64 transaction must survive byte for byte.
+ */
 const asArray = (value: unknown, context: string): Record<string, unknown>[] => {
   if (!Array.isArray(value) || !value.every(isRecord)) {
     throw new Error(`${context}: expected an array of objects`);
   }
-  return value;
+  return value.map(
+    (entry) => sanitizeProviderValue(entry) as Record<string, unknown>,
+  );
 };
 
 const exactPositiveInteger = (value: string, label: string): string => {

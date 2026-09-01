@@ -6,6 +6,8 @@ An extensible TypeScript toolkit for EVM and Solana blockchain interactions. 177
 
 ## Quick Start
 
+Requires Node.js 20.18.1 or newer.
+
 **CLI** (fastest way to try it):
 ```bash
 npx @agentek/cli list          # browse up to 177 tools
@@ -243,7 +245,9 @@ const tools = [
 
 **Solana**
 
-- Mainnet-beta by default; any cluster via `SOLANA_RPC_URL` or a tool's `rpcUrl` parameter.
+- Mainnet-beta by default. Tools take a `cluster` parameter (`mainnet-beta`, `devnet`,
+  `testnet`) to switch cluster; a private or self-hosted endpoint is configured once
+  via `SOLANA_RPC_URL` or `solana.rpcUrl` rather than passed per call.
 
 ## Solana
 

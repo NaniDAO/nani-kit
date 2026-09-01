@@ -4,7 +4,7 @@
  * signature is well-formed and that the RPC accepts it before failing on
  * balance.
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { createPublicKey, verify } from "node:crypto";
 import { http } from "viem";
 import { mainnet } from "viem/chains";
@@ -12,7 +12,9 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
   Keypair,
   PublicKey,
+  SendTransactionError,
   SystemProgram,
+  TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
 import { createAgentekClient, type SolanaConfig } from "../client.js";
@@ -77,13 +79,12 @@ describe("Solana signing", () => {
         }),
       ]);
 
-    // The account is unfunded, so the RPC verifies the signature and then
-    // rejects on balance. That rejection is the proof the signature passed.
+    // The account is unfunded, so preflight definitively rejects it. A known
+    // SendTransactionError remains an error rather than ambiguous submission.
     const error = await client
       .executeSolanaTransaction(transaction, blockhash, lastValidBlockHeight)
-      .then(() => null, (e: Error) => e);
-
-    expect(error?.message).toMatch(/no record of a prior credit/);
+      .then(() => null, (reason: Error) => reason);
+    expect(error).toBeInstanceOf(SendTransactionError);
 
     const signed = VersionedTransaction.deserialize(transaction.serialize());
     expect(
@@ -95,6 +96,152 @@ describe("Solana signing", () => {
       ),
     ).toBe(true);
   }, 60_000);
+
+  it("retains the signature when confirmation fails after submission", async () => {
+    const client = createClient({ privateKey: encodeBase58(sender.secretKey) });
+    const blockhash = PublicKey.default.toBase58();
+    const transaction = new VersionedTransaction(
+      new TransactionMessage({
+        payerKey: sender.publicKey,
+        recentBlockhash: blockhash,
+        instructions: [
+          SystemProgram.transfer({
+            fromPubkey: sender.publicKey,
+            toPubkey: recipient.publicKey,
+            lamports: 1n,
+          }),
+        ],
+      }).compileToV0Message(),
+    );
+
+    const connection = {
+      sendRawTransaction: vi.fn(async (raw: Uint8Array) => {
+        const submitted = VersionedTransaction.deserialize(raw);
+        return encodeBase58(submitted.signatures[0]);
+      }),
+      confirmTransaction: vi.fn(async () => {
+        throw new Error("confirmation transport failed");
+      }),
+    };
+    (client as any).solanaConnection = connection;
+
+    const result = await client.executeSolanaTransaction(
+      transaction,
+      blockhash,
+      123,
+    );
+
+    expect(result).toEqual({
+      signature: encodeBase58(transaction.signatures[0]),
+      confirmationStatus: "submitted",
+    });
+    expect(connection.sendRawTransaction).toHaveBeenCalledOnce();
+    expect(connection.confirmTransaction).toHaveBeenCalledOnce();
+  });
+
+  it("returns an unknown outcome with the local signature when submission throws", async () => {
+    const client = createClient({ privateKey: encodeBase58(sender.secretKey) });
+    const blockhash = PublicKey.default.toBase58();
+    const transaction = new VersionedTransaction(
+      new TransactionMessage({
+        payerKey: sender.publicKey,
+        recentBlockhash: blockhash,
+        instructions: [],
+      }).compileToV0Message(),
+    );
+
+    const connection = {
+      sendRawTransaction: vi.fn(async () => {
+        throw new Error("connection reset after request write");
+      }),
+      confirmTransaction: vi.fn(),
+    };
+    (client as any).solanaConnection = connection;
+
+    const result = await client.executeSolanaTransaction(
+      transaction,
+      blockhash,
+      123,
+    );
+
+    expect(result).toEqual({
+      signature: encodeBase58(transaction.signatures[0]),
+      confirmationStatus: "unknown",
+    });
+    expect(connection.confirmTransaction).not.toHaveBeenCalled();
+  });
+
+  it("rethrows a definitive preflight rejection", async () => {
+    const client = createClient({ privateKey: encodeBase58(sender.secretKey) });
+    const blockhash = PublicKey.default.toBase58();
+    const transaction = new VersionedTransaction(
+      new TransactionMessage({
+        payerKey: sender.publicKey,
+        recentBlockhash: blockhash,
+        instructions: [],
+      }).compileToV0Message(),
+    );
+    const rejection = new SendTransactionError({
+      action: "simulate",
+      signature: "",
+      transactionMessage: "insufficient funds",
+    });
+    const connection = {
+      sendRawTransaction: vi.fn(async () => {
+        throw rejection;
+      }),
+      confirmTransaction: vi.fn(),
+    };
+    (client as any).solanaConnection = connection;
+
+    await expect(
+      client.executeSolanaTransaction(transaction, blockhash, 123),
+    ).rejects.toBe(rejection);
+    expect(connection.confirmTransaction).not.toHaveBeenCalled();
+  });
+
+  it("bounds a stalled confirmation and returns a reconcilable status", async () => {
+    vi.useFakeTimers();
+    try {
+      const client = createClient({ privateKey: encodeBase58(sender.secretKey) });
+      (client as any).solanaKeypair = sender;
+      const blockhash = PublicKey.default.toBase58();
+      const transaction = new VersionedTransaction(
+        new TransactionMessage({
+          payerKey: sender.publicKey,
+          recentBlockhash: blockhash,
+          instructions: [],
+        }).compileToV0Message(),
+      );
+      const connection = {
+        sendRawTransaction: vi.fn(async (raw: Uint8Array) =>
+          encodeBase58(
+            VersionedTransaction.deserialize(raw).signatures[0],
+          ),
+        ),
+        confirmTransaction: vi.fn(
+          () => new Promise<never>(() => undefined),
+        ),
+      };
+      (client as any).solanaConnection = connection;
+
+      const execution = client.executeSolanaTransaction(
+        transaction,
+        blockhash,
+        123,
+      );
+      await Promise.resolve();
+      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(120_000);
+
+      await expect(execution).resolves.toEqual({
+        signature: encodeBase58(transaction.signatures[0]),
+        confirmationStatus: "submitted",
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 
   it("checks the balance before building a transfer it cannot fund", async () => {
     const client = createClient({ privateKey: encodeBase58(sender.secretKey) });

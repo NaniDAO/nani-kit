@@ -33,6 +33,33 @@ describe("quoteUnsafeIntegers", () => {
     });
   });
 
+  it("leaves a float whose fraction exceeds MAX_SAFE_INTEGER intact", () => {
+    // 0.1 + 0.2 needs 17 significant digits, so the fractional run on its own
+    // is larger than MAX_SAFE_INTEGER. Scanning only the integer part would
+    // restart at the ".", quote the fraction, and emit `0."30000000000000004"`.
+    expect(roundTrip('{"uiAmount":0.30000000000000004}')).toEqual({
+      uiAmount: 0.30000000000000004,
+    });
+    expect(
+      roundTrip('{"a":0.12345678901234568,"b":-0.30000000000000004}'),
+    ).toEqual({ a: 0.12345678901234568, b: -0.30000000000000004 });
+  });
+
+  it("consumes exponents rather than quoting their digits", () => {
+    expect(
+      roundTrip('{"a":1e21,"b":1E+21,"c":9.5e-8,"d":-1.5e-9}'),
+    ).toEqual({ a: 1e21, b: 1e21, c: 9.5e-8, d: -1.5e-9 });
+  });
+
+  it("still quotes large integers sitting next to floats", () => {
+    expect(
+      roundTrip('{"ui":0.30000000000000004,"amount":18446744073709551615}'),
+    ).toEqual({
+      ui: 0.30000000000000004,
+      amount: "18446744073709551615",
+    });
+  });
+
   it("does not touch digits inside strings, including escapes", () => {
     const json = '{"logs":["Program log: 99999999999999999999",  "quote \\" 18446744073709551615"]}';
     expect(roundTrip(json)).toEqual({

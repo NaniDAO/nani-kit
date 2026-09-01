@@ -18,9 +18,9 @@ import {
 import { solanaMarketTools } from "./market-tools.js";
 
 export function solanaTools(
-  options: { includeJupiter?: boolean } = { includeJupiter: true },
+  options: { includeJupiter?: boolean; includeIntents?: boolean } = {},
 ): BaseTool[] {
-  return createToolCollection([
+  const reads = [
     getSolBalanceTool,
     getSolanaAccountInfoTool,
     getSolanaTokenBalancesTool,
@@ -31,8 +31,18 @@ export function solanaTools(
     getSolanaBlockTool,
     getSolanaNetworkStatusTool,
     getSolanaPriorityFeesTool,
-    intentTransferSolTool,
-    intentTransferSplTokenTool,
+  ];
+
+  // includeIntents: false drops every tool that can move funds, so a read-only
+  // deployment can register the collection without the write surface.
+  const intents =
+    options.includeIntents === false
+      ? []
+      : [intentTransferSolTool, intentTransferSplTokenTool];
+
+  return createToolCollection([
+    ...reads,
+    ...intents,
     ...solanaMarketTools(options),
   ]);
 }

@@ -6,7 +6,11 @@ import { describe, it, expect } from "vitest";
 import { http } from "viem";
 import { mainnet } from "viem/chains";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { createAgentekClient, type SolanaConfig } from "../client.js";
+import {
+  createAgentekClient,
+  type AgentekClient,
+  type SolanaConfig,
+} from "../client.js";
 import { solanaTools } from "./index.js";
 import { SOLANA_TOKENS } from "./constants.js";
 import {
@@ -162,6 +166,27 @@ describe("Solana read tools", () => {
 });
 
 describe("Solana intents", () => {
+  it("rejects an RPC-selected program outside Token and Token-2022", async () => {
+    const { PublicKey } = await import("@solana/web3.js");
+    const unsupportedProgram = new PublicKey(unusedAddress());
+    const fakeClient = {
+      getSolanaAddress: async () => FUNDED_ADDRESS,
+      getSolanaRpcUrl: () => "https://rpc.example",
+      awaitSolanaPreSubmission: async <T>(promise: Promise<T>) => promise,
+      getSolanaConnection: async () => ({
+        getAccountInfo: async () => ({ owner: unsupportedProgram }),
+      }),
+    } as unknown as AgentekClient;
+
+    await expect(
+      intentTransferSplTokenTool.execute(fakeClient, {
+        token: "USDC",
+        to: RECIPIENT,
+        amount: "1",
+      }),
+    ).rejects.toThrow(/only the canonical Token and Token-2022 programs/);
+  });
+
   it("returns an unsigned transaction when no key is configured", async () => {
     const watchOnly = createSolanaTestClient({ address: FUNDED_ADDRESS });
 
@@ -239,6 +264,56 @@ describe("Solana intents", () => {
     ).rejects.toThrow(/has no token account/);
   }, 60_000);
 
+  it("refuses an SPL transfer to a token account rather than a wallet", async () => {
+    const watchOnly = createSolanaTestClient({ address: FUNDED_ADDRESS });
+    const { PublicKey } = await import("@solana/web3.js");
+    const { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } = await import(
+      "@solana/spl-token"
+    );
+
+    // What a block explorer shows for a token holding, and a routine thing to
+    // paste in place of the wallet that owns it. It is a PDA, so it is a valid
+    // 32-byte key that passes address validation but can never sign.
+    const tokenAccount = getAssociatedTokenAddressSync(
+      new PublicKey(SOLANA_TOKENS.USDC),
+      new PublicKey(FUNDED_ADDRESS),
+      false,
+      TOKEN_PROGRAM_ID,
+    ).toBase58();
+
+    expect(PublicKey.isOnCurve(new PublicKey(tokenAccount).toBytes())).toBe(
+      false,
+    );
+
+    await expect(
+      intentTransferSplTokenTool.execute(watchOnly, {
+        token: "USDC",
+        to: tokenAccount,
+        amount: "1",
+      }),
+    ).rejects.toThrow(/is a token account, not its owner's wallet address/);
+  }, 60_000);
+
+  it("allows a program-controlled PDA treasury as the recipient owner", async () => {
+    const watchOnly = createSolanaTestClient({ address: FUNDED_ADDRESS });
+    const { PublicKey } = await import("@solana/web3.js");
+    const [treasury] = PublicKey.findProgramAddressSync(
+      [Buffer.from("agentek-recipient-test")],
+      new PublicKey("11111111111111111111111111111111"),
+    );
+
+    const intent = await withRetry(() =>
+      intentTransferSplTokenTool.execute(watchOnly, {
+        token: "USDC",
+        to: treasury.toBase58(),
+        amount: "1",
+      }),
+    );
+
+    expect(intent.intent).toBe(`send 1 USDC to ${treasury.toBase58()}`);
+    expect(intent.signature).toBeUndefined();
+  }, 60_000);
+
   it("explains itself when no Solana account is configured at all", async () => {
     await expect(
       intentTransferSolTool.execute(client, { to: RECIPIENT, amount: "0.001" }),
@@ -258,5 +333,63 @@ describe("solanaTools collection", () => {
       expect(tool.description.length).toBeGreaterThan(20);
       expect(typeof tool.execute).toBe("function");
     }
+  });
+});
+
+describe("solanaTools options", () => {
+  it("drops every fund-moving tool when intents are excluded", () => {
+    const names = solanaTools({ includeIntents: false }).map((tool) => tool.name);
+
+    expect(names).not.toContain("intentTransferSol");
+    expect(names).not.toContain("intentTransferSplToken");
+    expect(names).not.toContain("intentSwapSolana");
+    // Reads and market data survive.
+    expect(names).toContain("getSolBalance");
+    expect(names).toContain("searchSolanaTokens");
+  });
+
+  it("keeps the intents by default", () => {
+    const names = solanaTools().map((tool) => tool.name);
+
+    expect(names).toContain("intentTransferSol");
+    expect(names).toContain("intentTransferSplToken");
+    expect(names).toContain("intentSwapSolana");
+  });
+});
+
+describe("cluster parameter", () => {
+  it("refuses an arbitrary endpoint, so a tool call cannot choose its own host", () => {
+    const schema = getSolBalanceTool.parameters;
+
+    for (const cluster of [
+      "http://169.254.169.254/latest/meta-data/",
+      "http://localhost:8899",
+      "https://evil.example/rpc",
+      "file:///etc/passwd",
+    ]) {
+      expect(
+        schema.safeParse({ address: FUNDED_ADDRESS, cluster }).success,
+      ).toBe(false);
+    }
+  });
+
+  it("rejects the removed rpcUrl parameter instead of silently changing clusters", () => {
+    expect(
+      getSolBalanceTool.parameters.safeParse({
+        address: FUNDED_ADDRESS,
+        rpcUrl: "https://api.devnet.solana.com",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("accepts the known clusters and defaults to the configured endpoint", () => {
+    const schema = getSolBalanceTool.parameters;
+
+    for (const cluster of ["mainnet-beta", "devnet", "testnet"]) {
+      expect(
+        schema.safeParse({ address: FUNDED_ADDRESS, cluster }).success,
+      ).toBe(true);
+    }
+    expect(schema.safeParse({ address: FUNDED_ADDRESS }).success).toBe(true);
   });
 });

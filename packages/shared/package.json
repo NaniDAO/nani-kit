@@ -73,6 +73,6 @@
     "url": "https://github.com/NaniDAO/agentek/issues"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=20.18.1"
   }
 }

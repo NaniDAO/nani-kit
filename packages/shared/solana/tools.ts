@@ -4,9 +4,11 @@ import { AgentekClient, createTool } from "../client.js";
 import { clean } from "../utils.js";
 import { solanaRpc } from "./rpc.js";
 import {
+  SOLANA_CLUSTER_URLS,
   SOLANA_MINT_SYMBOLS,
   TOKEN_2022_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
+  type SolanaCluster,
 } from "./constants.js";
 import {
   formatLamports,
@@ -15,27 +17,51 @@ import {
   solanaSignatureSchema,
 } from "./utils.js";
 
-const rpcUrlParameter = z
-  .string()
+/**
+ * Cluster selection is an enum, not a free-form URL. This parameter is filled
+ * in by the model, and an arbitrary endpoint would let any read tool POST to
+ * a host of the caller's choosing - an internal service, a metadata endpoint -
+ * and hand the response back. Private and self-hosted endpoints belong in
+ * client configuration (solana.rpcUrl / SOLANA_RPC_URL), which the model does
+ * not control.
+ */
+const clusterParameter = z
+  .enum(["mainnet-beta", "devnet", "testnet"])
   .optional()
   .describe(
-    "Solana JSON-RPC endpoint to query. Defaults to the configured endpoint, then SOLANA_RPC_URL, then the public mainnet-beta endpoint.",
+    "Solana cluster to query. Omit to use the configured endpoint (solana.rpcUrl or SOLANA_RPC_URL), which defaults to mainnet-beta.",
   );
 
+const strictReadParameters = <Shape extends z.ZodRawShape>(shape: Shape) =>
+  z.object(shape).strict();
+
+/**
+ * Private provider endpoints routinely carry the API key in the path or query
+ * string, so the resolved URL must never be echoed back to the model. Report
+ * the origin, which identifies the node without the credential.
+ */
+const endpointOrigin = (rpcUrl: string): string => {
+  try {
+    return new URL(rpcUrl).origin;
+  } catch {
+    return "invalid endpoint URL";
+  }
+};
+
 /** Every read tool takes the same escape hatch, so resolve it in one place. */
-const endpoint = (client: AgentekClient, rpcUrl?: string): string =>
-  rpcUrl || client.getSolanaRpcUrl();
+const endpoint = (client: AgentekClient, cluster?: SolanaCluster): string =>
+  cluster ? SOLANA_CLUSTER_URLS[cluster] : client.getSolanaRpcUrl();
 
 export const getSolBalanceTool = createTool({
   name: "getSolBalance",
   description:
     "Get the native SOL balance of a Solana address, in both lamports and SOL.",
-  parameters: z.object({
+  parameters: strictReadParameters({
     address: solanaAddressSchema.describe("Solana wallet address (base58)"),
-    rpcUrl: rpcUrlParameter,
+    cluster: clusterParameter,
   }),
   execute: async (client, args) => {
-    const result = await solanaRpc(endpoint(client, args.rpcUrl), "getBalance", [
+    const result = await solanaRpc(endpoint(client, args.cluster), "getBalance", [
       args.address,
     ]);
 
@@ -52,13 +78,13 @@ export const getSolanaAccountInfoTool = createTool({
   name: "getSolanaAccountInfo",
   description:
     "Get on-chain account info for a Solana address: owning program, lamports, data size, and parsed contents when the owning program is one the RPC can decode.",
-  parameters: z.object({
+  parameters: strictReadParameters({
     address: solanaAddressSchema.describe("Solana account address (base58)"),
-    rpcUrl: rpcUrlParameter,
+    cluster: clusterParameter,
   }),
   execute: async (client, args) => {
     const result = await solanaRpc(
-      endpoint(client, args.rpcUrl),
+      endpoint(client, args.cluster),
       "getAccountInfo",
       [args.address, { encoding: "jsonParsed" }],
     );
@@ -115,17 +141,17 @@ export const getSolanaTokenBalancesTool = createTool({
   name: "getSolanaTokenBalances",
   description:
     "List every SPL token balance held by a Solana wallet, across both the Token and Token-2022 programs. Zero balances are hidden unless requested.",
-  parameters: z.object({
+  parameters: strictReadParameters({
     owner: solanaAddressSchema.describe("Solana wallet address (base58)"),
     includeZeroBalances: z
       .boolean()
       .optional()
       .describe("Include token accounts with a zero balance. Defaults to false."),
-    rpcUrl: rpcUrlParameter,
+    cluster: clusterParameter,
   }),
   execute: async (client, args) => {
     const accounts = await fetchTokenAccounts(
-      endpoint(client, args.rpcUrl),
+      endpoint(client, args.cluster),
       args.owner,
     );
 
@@ -142,17 +168,17 @@ export const getSolanaTokenBalanceTool = createTool({
   name: "getSolanaTokenBalance",
   description:
     "Get a Solana wallet's balance of one SPL token. Accepts a mint address or a known symbol (USDC, USDT, BONK, JUP, WSOL). Sums across token accounts if the wallet holds more than one for that mint.",
-  parameters: z.object({
+  parameters: strictReadParameters({
     owner: solanaAddressSchema.describe("Solana wallet address (base58)"),
     token: z
       .string()
       .describe("SPL token mint address (base58) or a known symbol like 'USDC'"),
-    rpcUrl: rpcUrlParameter,
+    cluster: clusterParameter,
   }),
   execute: async (client, args) => {
     const mint = resolveSolanaMint(args.token);
     const result = await solanaRpc(
-      endpoint(client, args.rpcUrl),
+      endpoint(client, args.cluster),
       "getTokenAccountsByOwner",
       [args.owner, { mint }, { encoding: "jsonParsed" }],
     );
@@ -192,16 +218,16 @@ export const getSolanaTokenSupplyTool = createTool({
   name: "getSolanaTokenSupply",
   description:
     "Get the total circulating supply and decimals of an SPL token mint. Accepts a mint address or a known symbol.",
-  parameters: z.object({
+  parameters: strictReadParameters({
     token: z
       .string()
       .describe("SPL token mint address (base58) or a known symbol like 'USDC'"),
-    rpcUrl: rpcUrlParameter,
+    cluster: clusterParameter,
   }),
   execute: async (client, args) => {
     const mint = resolveSolanaMint(args.token);
     const result = await solanaRpc(
-      endpoint(client, args.rpcUrl),
+      endpoint(client, args.cluster),
       "getTokenSupply",
       [mint],
     );
@@ -220,7 +246,7 @@ export const getSolanaTransactionTool = createTool({
   name: "getSolanaTransaction",
   description:
     "Get details of a Solana transaction by signature: success, fee, compute units and its decoded instructions. Pass verbose for the full raw RPC response including logs and balance changes.",
-  parameters: z.object({
+  parameters: strictReadParameters({
     signature: solanaSignatureSchema.describe(
       "Transaction signature (base58, 88 characters)",
     ),
@@ -230,11 +256,11 @@ export const getSolanaTransactionTool = createTool({
       .describe(
         "Return the full raw transaction including logs and pre/post balances. Defaults to false, which returns a summary.",
       ),
-    rpcUrl: rpcUrlParameter,
+    cluster: clusterParameter,
   }),
   execute: async (client, args) => {
     const transaction = await solanaRpc(
-      endpoint(client, args.rpcUrl),
+      endpoint(client, args.cluster),
       "getTransaction",
       [
         args.signature,
@@ -281,7 +307,7 @@ export const getSolanaTransactionHistoryTool = createTool({
   name: "getSolanaTransactionHistory",
   description:
     "List recent transaction signatures for a Solana address, newest first. Paginate with the `before` signature.",
-  parameters: z.object({
+  parameters: strictReadParameters({
     address: solanaAddressSchema.describe("Solana address (base58)"),
     limit: z
       .number()
@@ -290,15 +316,14 @@ export const getSolanaTransactionHistoryTool = createTool({
       .max(1000)
       .optional()
       .describe("How many signatures to return (1-1000). Defaults to 10."),
-    before: z
-      .string()
+    before: solanaSignatureSchema
       .optional()
       .describe("Return signatures older than this signature, for pagination."),
-    rpcUrl: rpcUrlParameter,
+    cluster: clusterParameter,
   }),
   execute: async (client, args) => {
     const signatures = await solanaRpc(
-      endpoint(client, args.rpcUrl),
+      endpoint(client, args.cluster),
       "getSignaturesForAddress",
       [args.address, { limit: args.limit ?? 10, before: args.before }],
     );
@@ -325,7 +350,7 @@ export const getSolanaBlockTool = createTool({
   name: "getSolanaBlock",
   description:
     "Get a Solana block by slot, or the latest finalized block when no slot is given. Skipped slots are stepped over automatically when searching for the latest.",
-  parameters: z.object({
+  parameters: strictReadParameters({
     slot: z
       .number()
       .int()
@@ -335,10 +360,10 @@ export const getSolanaBlockTool = createTool({
       .boolean()
       .optional()
       .describe("Include the block's transaction signatures. Defaults to false."),
-    rpcUrl: rpcUrlParameter,
+    cluster: clusterParameter,
   }),
   execute: async (client, args) => {
-    const rpcUrl = endpoint(client, args.rpcUrl);
+    const rpcUrl = endpoint(client, args.cluster);
     const config = {
       encoding: "jsonParsed",
       maxSupportedTransactionVersion: 0,
@@ -377,9 +402,9 @@ export const getSolanaNetworkStatusTool = createTool({
   name: "getSolanaNetworkStatus",
   description:
     "Get Solana network status from the RPC: health, node version, current slot, block height and epoch progress.",
-  parameters: z.object({ rpcUrl: rpcUrlParameter }),
+  parameters: strictReadParameters({ cluster: clusterParameter }),
   execute: async (client, args) => {
-    const rpcUrl = endpoint(client, args.rpcUrl);
+    const rpcUrl = endpoint(client, args.cluster);
 
     // getHealth throws when the node is behind, which is itself the answer.
     const [health, version, epochInfo] = await Promise.all([
@@ -391,7 +416,8 @@ export const getSolanaNetworkStatusTool = createTool({
     ]);
 
     return clean({
-      rpcUrl,
+      // Origin only - the full URL may carry a provider API key.
+      rpcUrl: endpointOrigin(rpcUrl),
       health,
       solanaCore: version["solana-core"],
       featureSet: version["feature-set"],
@@ -416,18 +442,18 @@ export const getSolanaPriorityFeesTool = createTool({
   name: "getSolanaPriorityFees",
   description:
     "Get recent Solana priority fees in micro-lamports per compute unit, summarised as percentiles. Use `recommended` as the priorityFeeMicroLamports for a transfer.",
-  parameters: z.object({
+  parameters: strictReadParameters({
     accounts: z
       .array(z.string())
       .optional()
       .describe(
         "Accounts the transaction will write to. Fees are contention-specific, so passing these gives a far better estimate.",
       ),
-    rpcUrl: rpcUrlParameter,
+    cluster: clusterParameter,
   }),
   execute: async (client, args) => {
     const fees = await solanaRpc(
-      endpoint(client, args.rpcUrl),
+      endpoint(client, args.cluster),
       "getRecentPrioritizationFees",
       args.accounts?.length ? [args.accounts] : [],
     );

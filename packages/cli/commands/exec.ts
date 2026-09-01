@@ -5,6 +5,10 @@ import { withTimeout } from "../utils/timeout.js";
 import type { ClientContext } from "../utils/client.js";
 
 const DEFAULT_TIMEOUT_MS = 120_000;
+const NON_CANCELLABLE_TOOLS = new Set([
+  "intentTransferSol",
+  "intentTransferSplToken",
+]);
 
 export async function handleExec(
   { agentekClient, toolsMap }: ClientContext,
@@ -21,6 +25,12 @@ export async function handleExec(
   const flagArgs = rest.slice(1);
   const timeoutIdx = flagArgs.indexOf("--timeout");
   if (timeoutIdx !== -1) {
+    if (NON_CANCELLABLE_TOOLS.has(toolName)) {
+      outputError(
+        `--timeout is not supported for ${toolName}; wait for its confirmationStatus and reconcile the returned signature before retrying`,
+        { code: "INVALID_ARGS", retryable: false },
+      );
+    }
     const raw = flagArgs[timeoutIdx + 1];
     const parsed = Number(raw);
     if (!raw || Number.isNaN(parsed) || parsed <= 0) {
@@ -33,11 +43,13 @@ export async function handleExec(
   const flags = parseFlags(flagArgs, tool!.parameters);
 
   try {
-    const result = await withTimeout(
-      agentekClient.execute(toolName, flags),
-      timeoutMs,
-      toolName,
-    );
+    const execution = agentekClient.execute(toolName, flags);
+    // These calls may have crossed the irreversible submission boundary when
+    // the timer fires. Waiting for their explicit confirmationStatus is safer
+    // than reporting a timeout that invites a duplicate retry.
+    const result = NON_CANCELLABLE_TOOLS.has(toolName)
+      ? await execution
+      : await withTimeout(execution, timeoutMs, toolName);
     outputJson(result);
   } catch (err: any) {
     const msg: string = err.message || String(err);

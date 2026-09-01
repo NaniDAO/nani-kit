@@ -1,8 +1,13 @@
 import { z } from "zod";
 import { parseUnits } from "viem";
-import type { TransactionInstruction } from "@solana/web3.js";
+import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { AgentekClient, createTool, SolanaIntent } from "../client.js";
-import { SOLANA_MINT_SYMBOLS, SOL_DECIMALS } from "./constants.js";
+import {
+  SOLANA_MINT_SYMBOLS,
+  SOL_DECIMALS,
+  TOKEN_2022_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+} from "./constants.js";
 import { formatLamports, resolveSolanaMint, solanaAddressSchema } from "./utils.js";
 
 const priorityFeeParameter = z
@@ -47,7 +52,7 @@ const settle = async (
     };
   }
 
-  const signature = await client.executeSolanaTransaction(
+  const execution = await client.executeSolanaTransaction(
     transaction,
     blockhash,
     lastValidBlockHeight,
@@ -57,7 +62,8 @@ const settle = async (
     intent,
     chain: "solana",
     transaction: Buffer.from(transaction.serialize()).toString("base64"),
-    signature,
+    signature: execution.signature,
+    confirmationStatus: execution.confirmationStatus,
   };
 };
 
@@ -84,7 +90,10 @@ export const intentTransferSolTool = createTool({
     const lamports = parseUnits(args.amount, SOL_DECIMALS);
 
     const connection = await client.getSolanaConnection();
-    const balance = await connection.getBalance(new PublicKey(from));
+    const balance = await client.awaitSolanaPreSubmission(
+      connection.getBalance(new PublicKey(from)),
+      "getBalance",
+    );
     if (BigInt(balance) < lamports) {
       throw new Error(
         `${from} holds ${formatLamports(balance)} SOL, less than the ${args.amount} SOL requested`,
@@ -144,20 +153,54 @@ export const intentTransferSplTokenTool = createTool({
 
     // Token and Token-2022 mints are owned by different programs, and both the
     // ATA derivation and the transfer instruction need the right one.
-    const mintAccount = await connection.getAccountInfo(mint);
+    const mintAccount = await client.awaitSolanaPreSubmission(
+      connection.getAccountInfo(mint),
+      "getAccountInfo(mint)",
+    );
     if (!mintAccount) {
       throw new Error(
-        `Mint ${mint.toBase58()} does not exist on ${client.getSolanaRpcUrl()}`,
+        `Mint ${mint.toBase58()} does not exist on the configured Solana RPC`,
       );
     }
     const programId = mintAccount.owner;
+    const programAddress = programId.toBase58();
+    if (
+      programAddress !== TOKEN_PROGRAM_ID &&
+      programAddress !== TOKEN_2022_PROGRAM_ID
+    ) {
+      throw new Error(
+        `Mint ${mint.toBase58()} is owned by unsupported program ${programAddress}; only the canonical Token and Token-2022 programs are allowed`,
+      );
+    }
 
-    const { decimals } = await getMint(connection, mint, undefined, programId);
+    const { decimals } = await client.awaitSolanaPreSubmission(
+      getMint(connection, mint, undefined, programId),
+      "getMint",
+    );
     const amount = parseUnits(args.amount, decimals);
 
     const owner = new PublicKey(from);
     const recipient = new PublicKey(args.to);
+    // allowOwnerOffCurve stays on for the source: the configured account may
+    // legitimately be a PDA-owned treasury, and getting it wrong only means
+    // the transfer finds no balance.
     const source = getAssociatedTokenAddressSync(mint, owner, true, programId);
+
+    // Reject the concrete pasted-token-account mistake while preserving
+    // legitimate PDA-controlled treasuries and vaults as recipient owners.
+    const recipientAccount = await client.awaitSolanaPreSubmission(
+      connection.getAccountInfo(recipient),
+      "getAccountInfo(recipient)",
+    );
+    const recipientOwner = recipientAccount?.owner.toBase58();
+    if (
+      recipientOwner === TOKEN_PROGRAM_ID ||
+      recipientOwner === TOKEN_2022_PROGRAM_ID
+    ) {
+      throw new Error(
+        `Recipient ${args.to} is a token account, not its owner's wallet address. Pass the owner wallet instead; its associated token account is derived for you.`,
+      );
+    }
     const destination = getAssociatedTokenAddressSync(
       mint,
       recipient,
@@ -165,8 +208,11 @@ export const intentTransferSplTokenTool = createTool({
       programId,
     );
 
-    const sourceBalance = await connection
-      .getTokenAccountBalance(source)
+    const sourceBalance = await client
+      .awaitSolanaPreSubmission(
+        connection.getTokenAccountBalance(source),
+        "getTokenAccountBalance",
+      )
       .catch(() => null);
     if (!sourceBalance) {
       throw new Error(

@@ -4,6 +4,9 @@ import { resolve } from "node:path";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { z } from "zod";
+import { parseFlags } from "./utils/flags.js";
+import { scrubSecrets } from "./utils/output.js";
 
 const CLI = resolve(__dirname, "dist/index.mjs");
 
@@ -52,6 +55,41 @@ function parseJson(stdout: string): any {
     throw new Error(`Expected valid JSON, got:\n${stdout}`);
   }
 }
+
+describe("CLI — local input hardening", () => {
+  it("ignores prototype-mutating keys in --json", () => {
+    const result = parseFlags(
+      [
+        "--json",
+        '{"safe":"ok","__proto__":{"polluted":true},"constructor":{"prototype":{"polluted":true}},"prototype":{"polluted":true}}',
+      ],
+      z.object({}),
+    );
+
+    expect(result).toEqual({ safe: "ok" });
+    expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
+    expect(({} as any).polluted).toBeUndefined();
+  });
+
+  it("scrubs configured secrets and the config directory from errors", () => {
+    const previousKey = process.env.PERPLEXITY_API_KEY;
+    const previousDir = process.env.AGENTEK_CONFIG_DIR;
+    process.env.PERPLEXITY_API_KEY = "pplx-sensitive-test-value";
+    process.env.AGENTEK_CONFIG_DIR = "/tmp/private-agentek-config";
+    try {
+      expect(
+        scrubSecrets(
+          "failed with pplx-sensitive-test-value at /tmp/private-agentek-config/config.json",
+        ),
+      ).toBe("failed with [REDACTED:PERPLEXITY_API_KEY] at [CONFIG_DIR]/config.json");
+    } finally {
+      if (previousKey === undefined) delete process.env.PERPLEXITY_API_KEY;
+      else process.env.PERPLEXITY_API_KEY = previousKey;
+      if (previousDir === undefined) delete process.env.AGENTEK_CONFIG_DIR;
+      else process.env.AGENTEK_CONFIG_DIR = previousDir;
+    }
+  });
+});
 
 // ── Usage / help ─────────────────────────────────────────────────────────
 
