@@ -214,7 +214,9 @@ export const researchCA = createTool({
     const standard = erc721 === true || explorerType === "ERC-721" ? "ERC721"
       : erc1155 === true || explorerType === "ERC-1155" ? "ERC1155"
       : decimals !== undefined || explorerType === "ERC-20" ? "ERC20"
-      : codeResult.ok && codeResult.data && codeResult.data !== "0x" ? "contract" : "EOA_OR_UNDEPLOYED";
+      : codeResult.ok ? (codeResult.data && codeResult.data !== "0x" ? "contract" : "EOA_OR_UNDEPLOYED")
+      : addressResult.data?.is_contract === true ? "contract"
+      : "UNKNOWN";
     const abiInspection = inspectAbi(contractResult.data?.abi);
     const supplyRaw = decimalString(onchainSupply) ?? decimalString(tokenResult.data?.total_supply);
     const supply = supplyRaw && decimals !== undefined && Number(decimals) <= 30 && /^\d+$/.test(supplyRaw)
@@ -255,6 +257,7 @@ export const researchCA = createTool({
 
     const market = normalizePairs(marketResult.data, address);
     const warnings: string[] = [];
+    if (!codeResult.ok) warnings.push("On-chain bytecode could not be read; contract-vs-EOA classification may be unknown.");
     if (!contractResult.data?.is_verified) warnings.push("Contract source is not verified on the configured explorer; ABI capability checks may be incomplete.");
     if (contractResult.data?.is_proxy) warnings.push("This is reported as a proxy; implementation and upgrade authority matter more than proxy source alone.");
     if (!transferScan.complete) warnings.push(`Mint/transfer history is partial: at most ${MAX_TRANSFER_PAGES} explorer pages were scanned.`);
