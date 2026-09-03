@@ -143,5 +143,7 @@ describe("researchCA", () => {
     expect(result.classification.standard).toBe("UNKNOWN");
     expect(result.contract.hasCode).toBeUndefined();
     expect(result.warnings.join(" ")).toContain("classification may be unknown");
+    expect(result.warnings.join(" ")).toContain("verification data is unavailable");
+    expect(result.warnings.join(" ")).not.toContain("source is not verified");
   });
 });

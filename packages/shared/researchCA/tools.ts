@@ -258,10 +258,12 @@ export const researchCA = createTool({
     const market = normalizePairs(marketResult.data, address);
     const warnings: string[] = [];
     if (!codeResult.ok) warnings.push("On-chain bytecode could not be read; contract-vs-EOA classification may be unknown.");
-    if (!contractResult.data?.is_verified) warnings.push("Contract source is not verified on the configured explorer; ABI capability checks may be incomplete.");
+    if (!contractResult.ok) warnings.push("Explorer verification data is unavailable; verified-source and ABI capability checks are unknown.");
+    else if (!contractResult.data?.is_verified) warnings.push("Contract source is not verified on the configured explorer; ABI capability checks may be incomplete.");
     if (contractResult.data?.is_proxy) warnings.push("This is reported as a proxy; implementation and upgrade authority matter more than proxy source alone.");
     if (!transferScan.complete) warnings.push(`Mint/transfer history is partial: at most ${MAX_TRANSFER_PAGES} explorer pages were scanned.`);
-    if (!marketResult.ok || market.pairCount === 0) warnings.push("No Dexscreener pool data was found; this does not prove the asset is untradeable.");
+    if (!marketResult.ok) warnings.push("Dexscreener pool data is unavailable; trading-market facts are unknown.");
+    else if (market.pairCount === 0) warnings.push("No Dexscreener pool data was found; this does not prove the asset is untradeable.");
     if (abiInspection.capabilities.mintFunctionPresent) warnings.push("Verified ABI exposes a mint-named function; presence alone does not prove it is publicly callable.");
     if (abiInspection.capabilities.blacklistFunctionPresent || abiInspection.capabilities.tradingControlPresent) warnings.push("Verified ABI exposes blacklist or trading-control functions; inspect access control before trading.");
 
