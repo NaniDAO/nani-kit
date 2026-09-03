@@ -49,6 +49,8 @@ import { resolveTokenTools } from "../shared/resolveToken/index.js";
 import { approvalTools } from "../shared/approvals/index.js";
 import { contractTools } from "../shared/contract/index.js";
 import { solanaMarketTools } from "../shared/solana/market-tools.js";
+import { researchCATools } from "../shared/researchCA/index.js";
+import { robinhood } from "../shared/chains/robinhood.js";
 
 interface NaniSolanaConfig {
   address?: string;
@@ -80,7 +82,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   rpcUrlsByChainId?: Record<string, string>,
   solana?: NaniSolanaConfig,
 ): number => {
-  const chains = [mainnet, optimism, arbitrum, polygon, base, sepolia];
+  const chains = [mainnet, optimism, arbitrum, polygon, base, robinhood, sepolia];
   const transports = chains.map((chain) => {
     const customUrl = rpcUrlsByChainId?.[String(chain.id)];
     return customUrl ? http(customUrl) : http();
@@ -98,6 +100,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
     ...gasEstimatorTools(), ...defillamaTools(), ...dexscreenerTools(),
     ...thinkTools(), ...zammTools(), ...zrouterTools(), ...wnsTools(),
     ...resolveTokenTools(), ...approvalTools(), ...contractTools(),
+    ...researchCATools(),
     ...solanaMarketTools({
       includeJupiter: true,
       includeIntents: false,

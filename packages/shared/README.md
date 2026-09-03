@@ -37,6 +37,7 @@ The package includes tools for:
 - **DeFi**: Trading, lending, and yield information
 - **Identity**: ENS domain resolution and lookup
 - **Data**: Price feeds, block explorers, and market data
+- **Contract research**: One `researchCA` call for deterministic token/NFT identity, supply, holder concentration, bounded mint history, verified ABI privileges, and pool activity
 - **Security**: Address and transaction security checks
 - **Governance**: DAO voting and proposal information
 - **Web**: Basic web browsing and search tools

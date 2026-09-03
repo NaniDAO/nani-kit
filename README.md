@@ -192,6 +192,7 @@ const tools = [
 | Module | Tools | Description |
 |--------|-------|-------------|
 | **dexscreener** | 1 | `getLatestTokens` — trending token discovery |
+| **researchCA** | 1 | `researchCA` — aggregate EVM contract, token/NFT, holder, mint-history, privilege, and pool diligence with explicit data-completeness qualifiers |
 | **cryptoprices** | 1 | `getCryptoPrice` — current prices via CoinGecko |
 | **coindesk** | 1 | `getLatestCoindeskNewsTool` — crypto news |
 | **coinmarketcal** | 1 | `getMarketEvents` — upcoming market events |

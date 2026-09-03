@@ -36,6 +36,7 @@ import { resolveTokenTools } from "./resolveToken/index.js";
 import { approvalTools } from "./approvals/index.js";
 import { contractTools } from "./contract/index.js";
 import { solanaTools } from "./solana/index.js";
+import { researchCATools } from "./researchCA/index.js";
 import { assertOkResponse } from "./utils/fetch.js";
 
 const allTools = async ({
@@ -97,6 +98,7 @@ const allTools = async ({
     ...approvalTools(),
     ...contractTools(),
     ...solanaTools(),
+    ...researchCATools(),
   ];
 
   if (perplexityApiKey) {
@@ -181,5 +183,6 @@ export {
   approvalTools,
   contractTools,
   solanaTools,
+  researchCATools,
   assertOkResponse
 };
