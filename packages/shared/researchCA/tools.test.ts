@@ -130,4 +130,18 @@ describe("researchCA", () => {
     expect(result.contract.verified).toBeUndefined();
     expect(result.sources.some((source: { ok: boolean }) => !source.ok)).toBe(true);
   });
+
+  it("reports unknown classification when both chain and explorer evidence are unavailable", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse({}, 503)));
+    const client = { getPublicClient: () => ({
+      getCode: vi.fn().mockRejectedValue(new Error("RPC unavailable")),
+      readContract: vi.fn().mockRejectedValue(new Error("RPC unavailable")),
+    }) };
+
+    const result = await researchCA.execute(client as never, { chainId: 1, address: CONTRACT });
+
+    expect(result.classification.standard).toBe("UNKNOWN");
+    expect(result.contract.hasCode).toBeUndefined();
+    expect(result.warnings.join(" ")).toContain("classification may be unknown");
+  });
 });
