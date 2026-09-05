@@ -264,8 +264,31 @@ export class AgentekClient {
     }
     const specificClient = this.publicClients.get(chainId);
     if (!specificClient)
-      throw new Error(`No public client for chain ${chainId}`);
+      throw new Error(
+        `No public client for chain ${chainId}. This client is configured for: ${[
+          ...this.publicClients.keys(),
+        ].join(", ")}`,
+      );
     return specificClient;
+  }
+
+  /**
+   * Assert this client can actually reach `chainId`.
+   *
+   * Intent tools that build calldata without touching the chain used to return
+   * a complete, signable intent for a chain the client had no transport for —
+   * `depositWETH` on Sepolia, say — and only failed once the user had approved
+   * it and execution reached `executeOps`. Calling this first turns that into
+   * an error at build time.
+   */
+  public assertChainAvailable(chainId: number): void {
+    if (!this.publicClients.has(chainId)) {
+      throw new Error(
+        `Chain ${chainId} is not configured on this client. Available: ${[
+          ...this.publicClients.keys(),
+        ].join(", ")}`,
+      );
+    }
   }
 
   // Get all public clients
@@ -335,7 +358,7 @@ export class AgentekClient {
     }
 
     let hash = "";
-    for (const op of ops) {
+    for (const [index, op] of ops.entries()) {
       // Remove the explicit account parameter as it's already set in the wallet client
       // @ts-expect-error
       const txHash = await walletClient.sendTransaction({
@@ -344,9 +367,21 @@ export class AgentekClient {
         data: op.data,
       });
 
-      await publicClient.waitForTransactionReceipt({
+      const receipt = await publicClient.waitForTransactionReceipt({
         hash: txHash,
       });
+
+      // viem resolves for a reverted transaction rather than throwing — the
+      // outcome is in receipt.status. Without this check a reverted approval
+      // was reported as a successful hash, and the swap that depended on it
+      // was still submitted afterwards.
+      if (receipt.status !== "success") {
+        throw new Error(
+          `Transaction ${txHash} reverted on chain ${chainId}` +
+            (ops.length > 1 ? ` (operation ${index + 1} of ${ops.length})` : "") +
+            `. No further operations in this intent were submitted.`,
+        );
+      }
 
       if (ops.length > 1) {
         hash = hash + txHash + ";";
@@ -597,10 +632,15 @@ export class AgentekClient {
       throw new Error(`Tool ${method} not found`);
     }
 
-    if (args.chainId && tool.supportedChains) {
+    // An empty supportedChains means "not chain-specific", which is how every
+    // tool that declares one uses it. Read literally it meant "supports no
+    // chain", so a chain-agnostic tool rejected any chainId the model passed.
+    if (args.chainId && tool.supportedChains?.length) {
       if (!tool.supportedChains.map((c) => c.id).includes(args.chainId)) {
         throw new Error(
-          `Chain ${args.chainId} not supported by tool ${method}`,
+          `Chain ${args.chainId} not supported by tool ${method}. Supported: ${tool.supportedChains
+            .map((c) => c.id)
+            .join(", ")}`,
         );
       }
     }

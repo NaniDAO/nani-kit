@@ -1,12 +1,19 @@
 import { createTool } from "../client.js";
 import { z } from "zod";
 import { aavePoolAbi, getAavePoolAddress, supportedChains } from "./constants.js";
-import { formatUnits } from "viem";
+import { formatUnits, maxUint256 } from "viem";
+
+/** Aave scales health factors, and most user-facing amounts, by 1e18. */
+const WAD = 10n ** 18n;
 
 const formatRate = (rate: bigint) =>
   `${(Number(formatUnits(rate, 27)) * 100).toFixed(2)}%`;
 const isZeroAddress = (address: string) =>
   address === "0x0000000000000000000000000000000000000000";
+
+/** Read one flag out of an Aave v3 packed reserve-configuration bitmap. */
+const readConfigFlag = (configuration: bigint, bit: number): boolean =>
+  ((configuration >> BigInt(bit)) & 1n) === 1n;
 
 export const getAaveUserData = createTool({
   name: "getAaveUserData",
@@ -37,6 +44,12 @@ export const getAaveUserData = createTool({
       healthFactor,
     ] = result;
 
+    // getUserAccountData returns type(uint256).max as the health factor when the
+    // account has no debt at all. Every real health factor is scaled by 1e18, so
+    // it has to be compared against WAD — not against some small constant, which
+    // reports every borrower as having infinite headroom.
+    const hasNoDebt = totalDebtBase === 0n || healthFactor === maxUint256;
+
     return {
       summary: {
         totalCollateralUSD: `$${Number(formatUnits(totalCollateralBase, 8)).toFixed(2)}`,
@@ -44,23 +57,25 @@ export const getAaveUserData = createTool({
         availableToBorrowUSD: `$${Number(formatUnits(availableBorrowsBase, 8)).toFixed(2)}`,
         loanToValue: `${Number(formatUnits(ltv, 2)).toFixed(2)}%`,
         liquidationThreshold: `${Number(formatUnits(currentLiquidationThreshold, 2)).toFixed(2)}%`,
-        healthFactor:
-          healthFactor >= BigInt(1e9)
-            ? "∞"
-            : Number(formatUnits(healthFactor, 18)).toFixed(2),
+        healthFactor: hasNoDebt ? "∞" : formatUnits(healthFactor, 18),
       },
       riskAssessment: {
-        status:
-          healthFactor > BigInt(1e18)
-            ? "HEALTHY"
-            : healthFactor > BigInt(1e18)
-              ? "SAFE"
-              : "AT RISK",
+        // Thresholds match liquidationRisk below so the two can't disagree.
+        status: hasNoDebt
+          ? "HEALTHY"
+          : healthFactor < WAD
+            ? "LIQUIDATABLE"
+            : healthFactor < (WAD * 11n) / 10n
+              ? "AT RISK"
+              : healthFactor < 2n * WAD
+                ? "SAFE"
+                : "HEALTHY",
         canBorrow: availableBorrowsBase > BigInt(0) ? "YES" : "NO",
-        liquidationRisk:
-          healthFactor < BigInt(1.1e18)
+        liquidationRisk: hasNoDebt
+          ? "NONE"
+          : healthFactor < (WAD * 11n) / 10n
             ? "HIGH"
-            : healthFactor < BigInt(2e18)
+            : healthFactor < 2n * WAD
               ? "MEDIUM"
               : "LOW",
       },
@@ -114,8 +129,18 @@ export const getAaveReserveData = createTool({
 
     return {
       summary: {
-        assetStatus:
-          Number(result.configuration.data) > 0 ? "ACTIVE" : "INACTIVE",
+        // configuration.data is a packed bitmap, not a count: bit 56 is the
+        // "reserve is active" flag, 57 frozen, 60 paused. Testing the whole
+        // word for > 0 says ACTIVE for any configured reserve, frozen ones
+        // included — and Number() on a 256-bit word loses precision besides.
+        assetStatus: readConfigFlag(result.configuration.data, 56)
+          ? readConfigFlag(result.configuration.data, 60)
+            ? "PAUSED"
+            : readConfigFlag(result.configuration.data, 57)
+              ? "FROZEN"
+              : "ACTIVE"
+          : "INACTIVE",
+        borrowingEnabled: readConfigFlag(result.configuration.data, 58),
         supplyAPY: formatRate(result.currentLiquidityRate),
         variableBorrowAPY: formatRate(result.currentVariableBorrowRate),
         stableBorrowAPY: formatRate(result.currentStableBorrowRate),
@@ -133,16 +158,17 @@ export const getAaveReserveData = createTool({
           : "Not Available",
       },
       metrics: {
-        liquidityIndex: Number(formatUnits(result.liquidityIndex, 27)).toFixed(
-          8,
-        ),
-        accruedToTreasury: Number(
-          formatUnits(result.accruedToTreasury, 27),
+        // Only the indexes are ray-scaled (27 decimals). accruedToTreasury and
+        // unbacked are in the asset's own decimals and isolationModeTotalDebt is
+        // in 2-decimal base currency, so formatting all of them as rays rendered
+        // every one as 0.00000000. They are reported raw rather than mis-scaled.
+        liquidityIndex: Number(formatUnits(result.liquidityIndex, 27)).toFixed(8),
+        variableBorrowIndex: Number(
+          formatUnits(result.variableBorrowIndex, 27),
         ).toFixed(8),
-        unbacked: Number(formatUnits(result.unbacked, 27)).toFixed(8),
-        isolationModeTotalDebt: Number(
-          formatUnits(result.isolationModeTotalDebt, 27),
-        ).toFixed(8),
+        accruedToTreasuryScaled: result.accruedToTreasury.toString(),
+        unbackedScaled: result.unbacked.toString(),
+        isolationModeTotalDebtBase: result.isolationModeTotalDebt.toString(),
       },
       rawData: {
         configuration: result.configuration.data.toString(),
