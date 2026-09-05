@@ -1,6 +1,7 @@
 import z from "zod";
 import { createTool } from "../client.js";
 import type { BaseTool, AgentekClient } from "../client.js";
+import { assertOkResponse } from "../utils/fetch.js";
 
 export function createAskPerplexitySearchTool(
   perplexityApiKey: string,
@@ -15,6 +16,7 @@ export function createAskPerplexitySearchTool(
     execute: async (_client: AgentekClient, args) => {
       const options = {
         method: "POST",
+        signal: AbortSignal.timeout(60_000),
         headers: {
           Authorization: `Bearer ${perplexityApiKey}`,
           "Content-Type": "application/json",
@@ -50,8 +52,10 @@ export function createAskPerplexitySearchTool(
           "https://api.perplexity.ai/chat/completions",
           options,
         );
-        const result = await response.json();
-        return result;
+        // Without this, a 401 or 429 body was handed back as if it were an
+        // answer, and the model had no way to tell the difference.
+        await assertOkResponse(response, "Perplexity API error");
+        return await response.json();
       } catch (err) {
         throw new Error(`Perplexity API Error: ${err}`);
       }

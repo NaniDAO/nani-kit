@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTool } from "../client.js";
 import type { AgentekClient } from "../client.js";
 import { clean } from "../utils.js";
+import { assertOkResponse } from "../utils/fetch.js";
 
 const getFearAndGreedIndexToolParams = z.object({});
 
@@ -19,7 +20,10 @@ export const fearGreedIndexTool = createTool({
     _args: z.infer<typeof getFearAndGreedIndexToolParams>,
   ): Promise<GetFearAndGreedIndexToolReturnType> => {
     try {
-      const response = await fetch("https://api.alternative.me/fng/");
+      const response = await fetch("https://api.alternative.me/fng/", {
+        signal: AbortSignal.timeout(15_000),
+      });
+      await assertOkResponse(response, "Fear and Greed API error");
       const data = await response.json();
       if (
         !data ||

@@ -21,9 +21,12 @@ export default function AgentekTool(
     description: baseTool.description,
     inputSchema: baseTool.parameters,
     execute: async (args: z.infer<typeof baseTool.parameters>) => {
-      return agentekClient.execute(baseTool.name, args).catch((e: Error) => {
-        return e.message || "Could not process this function";
-      });
+      // Errors are rethrown rather than returned as the result. Returning
+      // `e.message` made a failure indistinguishable from data: the AI SDK saw
+      // a successful call whose value happened to be an error sentence, so the
+      // model had no signal to retry and nothing downstream could tell that
+      // the tool had failed at all.
+      return await agentekClient.execute(baseTool.name, args);
     },
   });
 }

@@ -1,7 +1,11 @@
-import { type Hex, type Account, http, isHex, zeroAddress } from "viem";
-import { mainnet, optimism, arbitrum, polygon, base } from "viem/chains";
+import { type Hex, type Account, isHex, zeroAddress } from "viem";
 import { createAgentekClient, type BaseTool } from "@agentek/tools/client";
-import { allTools } from "@agentek/tools";
+import {
+  allTools,
+  DEFAULT_CHAINS,
+  resolveTransports,
+  parseRpcUrlsEnv,
+} from "@agentek/tools";
 import { privateKeyToAccount } from "viem/accounts";
 import { resolveKeys } from "../config.js";
 import { isDaemonReachable, getDaemonAddress, createDaemonAccount } from "../signer/client.js";
@@ -34,8 +38,30 @@ export async function createClientFromEnv() {
   }
 
   // ── Blockchain setup ─────────────────────────────────────────────────
-  const chains = [mainnet, optimism, arbitrum, polygon, base];
-  const transports = chains.map(() => http());
+  // Endpoints come from config or env (RPC_URLS, RPC_URL_<chainId>, or the
+  // per-chain aliases) and fall back to known-good public ones. Every
+  // transport is bounded, so a rate-limited endpoint fails instead of hanging.
+  const chains = DEFAULT_CHAINS;
+  // resolveTransports reads process.env on its own, but CLI keys can also come
+  // from ~/.agentek/config.json, so the resolved values are passed in as
+  // explicit overrides rather than relying on the env alone.
+  const rpcOverrides: Record<number, string> = {
+    ...parseRpcUrlsEnv(keys.RPC_URLS),
+  };
+  const RPC_ALIASES: Record<string, number> = {
+    ETHEREUM_RPC_URL: 1,
+    OPTIMISM_RPC_URL: 10,
+    ARBITRUM_RPC_URL: 42161,
+    POLYGON_RPC_URL: 137,
+    BASE_RPC_URL: 8453,
+    MODE_RPC_URL: 34443,
+    SEPOLIA_RPC_URL: 11155111,
+  };
+  for (const [name, chainId] of Object.entries(RPC_ALIASES)) {
+    const url = keys[name];
+    if (url) rpcOverrides[chainId] = url;
+  }
+  const transports = resolveTransports(chains, rpcOverrides);
 
   // Prefer signing daemon if running, then PRIVATE_KEY, then ACCOUNT, then zeroAddress
   let account: Account | Hex;

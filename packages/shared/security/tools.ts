@@ -7,11 +7,13 @@
  * Note: The data is updated daily but has a 7-day delay from real-time data
  * to balance between providing free resources and protecting data integrity.
  */
-import { Chain } from "viem";
 import { createTool } from "../client.js";
 import { z } from "zod";
+import { assertOkResponse } from "../utils/fetch.js";
 
-const supportedChains: Chain[] = []; // essentially cross chain
+// Deliberately not declared: these tools are chain-agnostic, and leaving
+// supportedChains undefined is how that is expressed. An empty array used to
+// be read as "supports no chain", so a stray chainId was rejected outright.
 
 function normalizeUrl(url: string): string {
   try {
@@ -35,13 +37,34 @@ let lastAddressFetch = 0;
 let lastDomainFetch = 0;
 const CACHE_DURATION = 1000 * 60 * 60 * 24; // 24 hours to match daily updates
 
+const BLACKLIST_BASE =
+  "https://raw.githubusercontent.com/scamsniffer/scam-database/refs/heads/main/blacklist";
+const REQUEST_TIMEOUT_MS = 15_000;
+
+/**
+ * Fetch one blacklist. The status check matters more here than elsewhere: the
+ * result is cached for 24 hours, so without it a 404 page or a rate-limit body
+ * was parsed as the blacklist and every address looked clean for a day.
+ */
+async function fetchBlacklist(name: "address" | "domains"): Promise<string[]> {
+  const url = `${BLACKLIST_BASE}/${name}.json`;
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  });
+  await assertOkResponse(response, `Failed to fetch ScamSniffer ${name} blacklist`);
+  const list = await response.json();
+  if (!Array.isArray(list)) {
+    throw new Error(
+      `ScamSniffer ${name} blacklist at ${url} was not a JSON array; refusing to cache it.`,
+    );
+  }
+  return list;
+}
+
 async function getAddressBlacklist() {
   const now = Date.now();
   if (!addressBlacklist || now - lastAddressFetch > CACHE_DURATION) {
-    const response = await fetch(
-      "https://raw.githubusercontent.com/scamsniffer/scam-database/refs/heads/main/blacklist/address.json",
-    );
-    addressBlacklist = await response.json();
+    addressBlacklist = await fetchBlacklist("address");
     lastAddressFetch = now;
   }
   return addressBlacklist;
@@ -50,10 +73,7 @@ async function getAddressBlacklist() {
 async function getDomainBlacklist() {
   const now = Date.now();
   if (!domainBlacklist || now - lastDomainFetch > CACHE_DURATION) {
-    const response = await fetch(
-      "https://raw.githubusercontent.com/scamsniffer/scam-database/refs/heads/main/blacklist/domains.json",
-    );
-    domainBlacklist = await response.json();
+    domainBlacklist = await fetchBlacklist("domains");
     lastDomainFetch = now;
   }
   return domainBlacklist;
@@ -63,7 +83,6 @@ export const checkMaliciousAddress = createTool({
   name: "checkMaliciousAddress",
   description:
     "Check if an Ethereum address has been flagged as malicious in the ScamSniffer blacklist database. Returns whether the address is known to be associated with scams or exploits.",
-  supportedChains,
   parameters: z.object({
     address: z.string().describe("The Ethereum address to check (0x...)"),
   }),

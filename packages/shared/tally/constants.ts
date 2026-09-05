@@ -1,5 +1,7 @@
 export const TALLY_API_URL = "https://api.tally.xyz/query";
 
+export const TALLY_TIMEOUT_MS = 20_000;
+
 export const GovernorBravoDelegateAbi = [
   {
     anonymous: false,

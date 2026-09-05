@@ -1,6 +1,8 @@
 import { allTools } from "../packages/shared";
 
-const tools = allTools({
+// allTools is async — twitterTools may need to exchange app credentials for a
+// bearer token before it can name its tools.
+const tools = await allTools({
   perplexityApiKey: process.env.PERPLEXITY_API_KEY,
   zeroxApiKey: process.env.ZEROX_API_KEY,
   tallyApiKey: process.env.TALLY_API_KEY,

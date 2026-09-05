@@ -300,7 +300,11 @@ The public mainnet-beta endpoint is heavily rate limited — set
 
 ## Environment Variables
 
-Most tools work without any API keys. Optional keys unlock additional features:
+Most tools work without any API keys. Optional keys unlock additional features.
+
+EVM tools fall back to public RPC endpoints, which are shared and rate limited —
+point `RPC_URLS` (or the per-chain variables) at your own provider for anything
+beyond casual use.
 
 | Variable | Required for |
 |----------|-------------|
@@ -309,6 +313,9 @@ Most tools work without any API keys. Optional keys unlock additional features:
 | `SOLANA_PRIVATE_KEY` | Signing Solana transactions (base58 or JSON byte array) |
 | `SOLANA_ACCOUNT` | Read-only Solana address (alternative to SOLANA_PRIVATE_KEY) |
 | `SOLANA_RPC_URL` | Solana JSON-RPC endpoint (defaults to public mainnet-beta) |
+| `RPC_URLS` | EVM endpoints as a `chainId=url` list, e.g. `1=https://…,8453=https://…` |
+| `RPC_URL_<chainId>` | EVM endpoint for one chain, e.g. `RPC_URL_1` |
+| `ETHEREUM_RPC_URL` and friends | Per-chain aliases: `OPTIMISM_`, `ARBITRUM_`, `POLYGON_`, `BASE_`, `MODE_`, `SEPOLIA_` |
 | `JUPITER_API_KEY` | Higher Jupiter Tokens V2 and Swap V2 rate limits and analytics (keyless access is supported) |
 | `PERPLEXITY_API_KEY` | AI-powered search |
 | `ZEROX_API_KEY` | Token swaps via 0x |

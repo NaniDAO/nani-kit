@@ -1,4 +1,4 @@
-import { TALLY_API_URL } from "./constants.js";
+import { TALLY_API_URL, TALLY_TIMEOUT_MS } from "./constants.js";
 
 import { getAddress } from "viem";
 
@@ -44,6 +44,7 @@ export async function getGovernorBySlug(slug: string, tallyApiKey: string) {
       "Content-Type": "application/json",
       "Api-Key": tallyApiKey,
     },
+    signal: AbortSignal.timeout(TALLY_TIMEOUT_MS),
     body: JSON.stringify({
       query: getGovernorQuery,
       variables: { slug },

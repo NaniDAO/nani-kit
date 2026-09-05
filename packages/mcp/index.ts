@@ -1,10 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { type Hex, http, isHex, zeroAddress } from "viem";
-import { mainnet, optimism, arbitrum, polygon, base } from "viem/chains";
+import { type Hex, isHex, zeroAddress } from "viem";
 import { createAgentekClient, type BaseTool } from "@agentek/tools/client";
-import { allTools } from "@agentek/tools";
+import {
+  allTools,
+  DEFAULT_CHAINS,
+  resolveTransports,
+  parseRpcUrlsEnv,
+} from "@agentek/tools";
 import { privateKeyToAccount } from "viem/accounts";
 
 const VERSION = "0.1.26";
@@ -50,14 +54,21 @@ async function main() {
   const X_BEARER_TOKEN = process.env.X_BEARER_TOKEN;
   const X_API_KEY = process.env.X_API_KEY;
   const X_API_KEY_SECRET = process.env.X_API_KEY_SECRET;
+  const X_ACCESS_TOKEN = process.env.X_ACCESS_TOKEN;
+  const X_ACCESS_TOKEN_SECRET = process.env.X_ACCESS_TOKEN_SECRET;
 
   if (PRIVATE_KEY && !isHex(PRIVATE_KEY)) {
     throw new Error("Invalid PRIVATE_KEY format, must be hex");
   }
 
   // ── Blockchain setup ─────────────────────────────────────────────────
-  const chains = [mainnet, optimism, arbitrum, polygon, base];
-  const transports = chains.map(() => http());
+  // Endpoints come from RPC_URLS / RPC_URL_<chainId> / per-chain aliases, and
+  // fall back to known-good public ones with a bounded timeout.
+  const chains = DEFAULT_CHAINS;
+  const transports = resolveTransports(
+    chains,
+    parseRpcUrlsEnv(process.env.RPC_URLS),
+  );
   const account = PRIVATE_KEY
     ? privateKeyToAccount(PRIVATE_KEY as Hex)
     : (ACCOUNT && isHex(ACCOUNT) ? ACCOUNT as Hex : zeroAddress);
@@ -84,6 +95,10 @@ async function main() {
       xBearerToken: X_BEARER_TOKEN,
       xApiKey: X_API_KEY,
       xApiKeySecret: X_API_KEY_SECRET,
+      // Forwarded so getHomeTimeline, which needs OAuth 1.0a user
+      // credentials, can register over MCP as it does in the CLI.
+      xAccessToken: X_ACCESS_TOKEN,
+      xAccessTokenSecret: X_ACCESS_TOKEN_SECRET,
     }),
   });
 

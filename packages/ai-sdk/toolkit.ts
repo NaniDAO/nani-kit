@@ -2,6 +2,7 @@ import {
   BaseTool,
   createAgentekClient,
   AgentekClient,
+  type SolanaConfig,
 } from "@agentek/tools/client";
 import type { Tool } from "ai";
 import AgentekTool from "./tool.js";
@@ -16,17 +17,21 @@ class AgentekToolkit {
     chains,
     transports,
     tools,
+    solana,
   }: {
     accountOrAddress: Account | Address;
     chains: Chain[];
     transports: Transport[];
     tools: BaseTool[];
+    /** Solana settings. Without this the twelve Solana tools have no account. */
+    solana?: SolanaConfig;
   }) {
     this._agent = createAgentekClient({
       accountOrAddress,
       chains,
       transports,
       tools,
+      solana,
     });
 
     this.tools = {};

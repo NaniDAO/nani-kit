@@ -38,6 +38,12 @@ import { contractTools } from "./contract/index.js";
 import { solanaTools } from "./solana/index.js";
 import { researchCATools } from "./researchCA/index.js";
 import { assertOkResponse } from "./utils/fetch.js";
+import {
+  DEFAULT_CHAINS,
+  resolveRpcUrl,
+  resolveTransports,
+  parseRpcUrlsEnv,
+} from "./chains/config.js";
 
 const allTools = async ({
   perplexityApiKey,
@@ -184,5 +190,11 @@ export {
   contractTools,
   solanaTools,
   researchCATools,
-  assertOkResponse
+  assertOkResponse,
+
+  // Chain/RPC configuration shared by the CLI, the MCP server and tests
+  DEFAULT_CHAINS,
+  resolveRpcUrl,
+  resolveTransports,
+  parseRpcUrlsEnv,
 };

@@ -32,8 +32,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc && tsc -p tsconfig.cjs.json",
-    "test": "vitest"
+    "build": "rm -rf dist && tsc && tsc -p tsconfig.cjs.json && node -e \"require('fs').writeFileSync('dist/cjs/package.json', JSON.stringify({type:'commonjs'}))\" && node -e \"require('fs').writeFileSync('dist/esm/package.json', JSON.stringify({type:'module'}))\"",
+    "test": "vitest run"
   },
   "dependencies": {
     "@solana/spl-token": "0.4.15",
@@ -46,14 +46,14 @@
     "wns-utils": "^0.2.1"
   },
   "peerDependencies": {
-    "viem": "^2.33.2",
-    "zod": "^3.25.76",
-    "zrouter-sdk": "^0.0.27"
+    "viem": "2.33.2",
+    "zod": "3.25.76",
+    "zrouter-sdk": "0.0.27"
   },
   "devDependencies": {
-    "@types/node": "^22.14.1",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "@types/node": "22.14.1",
+    "typescript": "5.9.2",
+    "vitest": "3.2.4"
   },
   "keywords": [
     "blockchain",

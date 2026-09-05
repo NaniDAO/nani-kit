@@ -2,7 +2,7 @@ import z from "zod";
 import { createTool } from "../client.js";
 import type { BaseTool, AgentekClient } from "../client.js";
 import { getGovernorBySlug } from "./utils.js";
-import { TALLY_API_URL } from "./constants.js";
+import { TALLY_API_URL, TALLY_TIMEOUT_MS } from "./constants.js";
 
 export function createTallyProposalsTool(tallyApiKey: string): BaseTool {
   return createTool({
@@ -84,6 +84,7 @@ export function createTallyProposalsTool(tallyApiKey: string): BaseTool {
           "Content-Type": "application/json",
           "Api-Key": tallyApiKey,
         },
+        signal: AbortSignal.timeout(TALLY_TIMEOUT_MS),
         body: JSON.stringify({
           query: getProposalsQuery,
           variables: {
@@ -136,6 +137,7 @@ export function createTallyChainsTool(tallyApiKey: string): BaseTool {
           "Content-Type": "application/json",
           "Api-Key": tallyApiKey,
         },
+        signal: AbortSignal.timeout(TALLY_TIMEOUT_MS),
         body: JSON.stringify({ query }),
       });
 
@@ -193,6 +195,7 @@ export function createTallyUserDaosTool(tallyApiKey: string): BaseTool {
           "Content-Type": "application/json",
           "Api-Key": tallyApiKey,
         },
+        signal: AbortSignal.timeout(TALLY_TIMEOUT_MS),
         body: JSON.stringify({
           query,
           variables: {

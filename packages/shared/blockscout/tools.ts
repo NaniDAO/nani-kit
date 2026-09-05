@@ -38,15 +38,61 @@ const BLOCKSCOUT_API_ENDPOINTS = new Map([
 
 type SupportedChain = (typeof supportedChains)[number]["id"];
 
+/** Blockscout can stall indefinitely on busy addresses; bound every call. */
+const BLOCKSCOUT_TIMEOUT_MS = 30_000;
+
+/** Default page size for list endpoints. Blockscout itself returns ~50. */
+export const DEFAULT_ITEM_LIMIT = 10;
+
+/**
+ * Longest string kept inside a list item.
+ *
+ * Capping the item count alone wasn't enough: a single Blockscout transaction
+ * carries `raw_input` and decoded call data that can run to tens of kilobytes,
+ * so ten of them still came to ~65k tokens. Long values are cut with a marker
+ * that says how much was dropped, which keeps the item readable and lets the
+ * caller go to getTransactionInfo for the full record.
+ */
+const MAX_FIELD_CHARS = 512;
+
+function trimLongStrings(value: unknown, depth = 0): unknown {
+  if (typeof value === "string") {
+    return value.length > MAX_FIELD_CHARS
+      ? `${value.slice(0, MAX_FIELD_CHARS)}…[truncated, ${value.length} chars total]`
+      : value;
+  }
+  if (depth > 6) return value;
+  if (Array.isArray(value)) return value.map((v) => trimLongStrings(v, depth + 1));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, trimLongStrings(v, depth + 1)]),
+    );
+  }
+  return value;
+}
+
+/** Shared `limit` parameter for the list-returning tools. */
+export const limitSchema = z
+  .number()
+  .int()
+  .min(1)
+  .max(100)
+  .optional()
+  .describe(
+    `Maximum number of items to return (1-100, default ${DEFAULT_ITEM_LIMIT}). Raise it only when you need more; a full page of transactions can run to hundreds of kilobytes.`,
+  );
+
 /**
  * Helper to call a Blockscout v2 endpoint.
  * The endpoint parameter should be the "path" (starting with a slash) after the base URL.
- * An optional query object is appended as query parameters.
+ * An optional query object is appended as query parameters, and `options.limit`
+ * caps how many items a list response returns.
  */
 export async function fetchFromBlockscoutV2(
   chain: SupportedChain,
   endpoint: string,
   query?: Record<string, string>,
+  options?: { limit?: number },
 ) {
   const baseUrl = BLOCKSCOUT_API_ENDPOINTS.get(chain);
   if (!baseUrl) {
@@ -58,13 +104,47 @@ export async function fetchFromBlockscoutV2(
     url += `?${queryParams.toString()}`;
   }
   try {
-    const res = await fetch(url);
+    // Without a signal, a Blockscout endpoint that never answers — which
+    // /internal-transactions and /withdrawals do for high-activity addresses —
+    // hangs the caller forever rather than failing.
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(BLOCKSCOUT_TIMEOUT_MS),
+    });
     if (!res.ok) {
       throw new Error(`HTTP error ${res.status}: ${await res.text()}`);
     }
-    return await res.json();
+    const json = await res.json();
+
+    // List endpoints return every item Blockscout has for the page — over half
+    // a megabyte for an active address, which is more than the context window
+    // this is being called into. Cap it, and say what was left behind.
+    if (json && Array.isArray(json.items)) {
+      const limit = options?.limit ?? DEFAULT_ITEM_LIMIT;
+      const total = json.items.length;
+      const items = json.items.slice(0, limit).map((item: unknown) =>
+        trimLongStrings(item),
+      );
+      if (total > limit) {
+        return {
+          ...json,
+          items,
+          items_returned: limit,
+          items_available_on_page: total,
+          truncated: true,
+          truncation_note: `Showing ${limit} of ${total} items on this page, with long fields shortened. Pass a higher \`limit\` for more, use next_page_params to page, or call the per-transaction tools for a full record.`,
+        };
+      }
+      return { ...json, items, items_returned: total, truncated: false };
+    }
+
+    return json;
   } catch (error: unknown) {
     if (error instanceof Error) {
+      if (error.name === "TimeoutError" || error.name === "AbortError") {
+        throw new Error(
+          `Blockscout request timed out after ${BLOCKSCOUT_TIMEOUT_MS}ms: ${url}`,
+        );
+      }
       throw new Error(`Failed to fetch from Blockscout: ${error.message}`);
     }
     throw error;
@@ -100,10 +180,16 @@ export const getNativeCoinHolders = createTool({
   supportedChains: supportedChains,
   parameters: z.object({
     chain: chainSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain } = args;
-    return await fetchFromBlockscoutV2(chain as SupportedChain, `/addresses`);
+    const { chain, limit } = args;
+    return await fetchFromBlockscoutV2(
+      chain as SupportedChain,
+      `/addresses`,
+      undefined,
+      { limit },
+    );
   },
 });
 
@@ -158,12 +244,15 @@ export const getAddressCounters = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/counters`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -180,12 +269,15 @@ export const getAddressTransactions = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/transactions`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -202,12 +294,15 @@ export const getAddressTokenTransfers = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/token-transfers`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -224,12 +319,15 @@ export const getAddressInternalTransactions = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/internal-transactions`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -246,12 +344,15 @@ export const getAddressLogs = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/logs`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -268,12 +369,15 @@ export const getAddressBlocksValidated = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/blocks-validated`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -290,12 +394,15 @@ export const getAddressTokenBalances = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/token-balances`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -312,12 +419,15 @@ export const getAddressTokens = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/tokens`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -334,12 +444,15 @@ export const getAddressCoinBalanceHistory = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/coin-balance-history`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -356,12 +469,15 @@ export const getAddressCoinBalanceHistoryByDay = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/coin-balance-history-by-day`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -378,12 +494,15 @@ export const getAddressWithdrawals = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/withdrawals`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -400,12 +519,15 @@ export const getAddressNFTs = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/nft`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -422,12 +544,15 @@ export const getAddressNFTCollections = createTool({
   parameters: z.object({
     chain: chainSchema,
     address: addressSchema,
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/addresses/${address}/nft/collections`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -451,12 +576,15 @@ export const getBlockInfo = createTool({
   parameters: z.object({
     chain: chainSchema,
     blockNumberOrHash: z.union([z.string(), z.number()]).describe("Block number or block hash to query"),
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, blockNumberOrHash } = args;
+    const { chain, blockNumberOrHash, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/blocks/${blockNumberOrHash}`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -473,12 +601,15 @@ export const getBlockTransactions = createTool({
   parameters: z.object({
     chain: chainSchema,
     blockNumberOrHash: z.union([z.string(), z.number()]).describe("Block number or block hash to query"),
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, blockNumberOrHash } = args;
+    const { chain, blockNumberOrHash, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/blocks/${blockNumberOrHash}/transactions`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -495,12 +626,15 @@ export const getBlockWithdrawals = createTool({
   parameters: z.object({
     chain: chainSchema,
     blockNumberOrHash: z.union([z.string(), z.number()]).describe("Block number or block hash to query"),
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, blockNumberOrHash } = args;
+    const { chain, blockNumberOrHash, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/blocks/${blockNumberOrHash}/withdrawals`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -624,12 +758,15 @@ export const getTransactionInternalTransactions = createTool({
   parameters: z.object({
     chain: chainSchema,
     txhash: z.string().describe("The transaction hash (0x...)"),
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, txhash } = args;
+    const { chain, txhash, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/transactions/${txhash}/internal-transactions`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -646,12 +783,15 @@ export const getTransactionLogs = createTool({
   parameters: z.object({
     chain: chainSchema,
     txhash: z.string().describe("The transaction hash (0x...)"),
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, txhash } = args;
+    const { chain, txhash, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/transactions/${txhash}/logs`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -668,12 +808,15 @@ export const getTransactionRawTrace = createTool({
   parameters: z.object({
     chain: chainSchema,
     txhash: z.string().describe("The transaction hash (0x...)"),
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, txhash } = args;
+    const { chain, txhash, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/transactions/${txhash}/raw-trace`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -690,12 +833,15 @@ export const getTransactionStateChanges = createTool({
   parameters: z.object({
     chain: chainSchema,
     txhash: z.string().describe("The transaction hash (0x...)"),
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, txhash } = args;
+    const { chain, txhash, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/transactions/${txhash}/state-changes`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -712,12 +858,15 @@ export const getTransactionSummary = createTool({
   parameters: z.object({
     chain: chainSchema,
     txhash: z.string().describe("The transaction hash (0x...)"),
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, txhash } = args;
+    const { chain, txhash, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/transactions/${txhash}/summary`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -776,12 +925,15 @@ export const getSmartContract = createTool({
       .string()
       .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid contract address")
       .describe("The smart contract address to look up (0x...)"),
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, address } = args;
+    const { chain, address, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/smart-contracts/${address}`,
+      undefined,
+      { limit },
     );
   },
 });
@@ -808,12 +960,15 @@ export const getTokenInfo = createTool({
       .string()
       .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid token contract address")
       .describe("The token contract address (0x...)"),
+    limit: limitSchema,
   }),
   execute: async (_, args) => {
-    const { chain, tokenContract } = args;
+    const { chain, tokenContract, limit } = args;
     return await fetchFromBlockscoutV2(
       chain as SupportedChain,
       `/tokens/${tokenContract}`,
+      undefined,
+      { limit },
     );
   },
 });
