@@ -55,12 +55,20 @@ export const intentSwap = createTool({
     const walletClient = client.getWalletClient(chainId);
     const publicClient = client.getPublicClient(chainId);
 
+    // client.getAddress() covers the watch-only case — an address configured
+    // without a private key — which every other intent tool in the library
+    // already supports. Reading only walletClient.account made intentSwap the
+    // one tool that couldn't build an unsigned intent for such a client.
     const owner: Address =
       args.owner ??
       (walletClient?.account?.address as Address) ??
-      (() => {
-        throw new Error("Owner address is required (connect a wallet or pass 'owner').");
-      })();
+      (await client.getAddress());
+
+    if (!owner || owner === "0x0000000000000000000000000000000000000000") {
+      throw new Error(
+        "Owner address is required (connect a wallet, configure ACCOUNT, or pass 'owner').",
+      );
+    }
 
     const finalTo: Address = args.finalTo ?? owner;
 

@@ -58,9 +58,12 @@ export const intentApproveTool = createTool({
           try {
             const isMax = amount.toLowerCase() === "max";
             const publicClient = client.getPublicClient(chain.id);
-            const decimals = isMax
-              ? 0
-              : await getTokenDecimals(publicClient, token as Address);
+            // Always read decimals, even for "max" where the value isn't
+            // needed: this call is what proves the token exists on this chain,
+            // and skipping it left every chain a candidate. The winner was then
+            // picked on gas price alone, so `max` approvals were built against
+            // a mainnet token address on whichever chain was cheapest.
+            const decimals = await getTokenDecimals(publicClient, token as Address);
 
             const amountBigInt = isMax ? maxUint256 : parseUnits(amount, decimals);
 

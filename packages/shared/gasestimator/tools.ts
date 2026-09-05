@@ -46,8 +46,11 @@ export const estimateGasCostTool = createTool({
         ? parseUnits(maxPriorityFeePerGas, 9) 
         : feeData?.maxPriorityFeePerGas ?? BigInt(0);
 
-      // Calculate total gas cost in wei, with chain-specific adjustments
-      const totalGasCost = BigInt(gasUnits) * finalMaxFeePerGas * getGasPriceDivisor(chainId) / BigInt(1000);
+      // gas units × price per unit. finalMaxFeePerGas is already this chain's
+      // live fee, so "L2s are ~10x cheaper" is baked into it; the hard-coded
+      // per-chain divisor that used to be applied here discounted it a second
+      // time and understated Polygon by 100x.
+      const totalGasCost = BigInt(gasUnits) * finalMaxFeePerGas;
       
       // Get the chain's native token symbol
       const nativeSymbol = getNativeTokenSymbol(chainId);
@@ -117,28 +120,4 @@ function getNativeTokenSymbol(chainId: number): string {
   };
   
   return symbols[chainId] || "ETH"; // Default to ETH if chain ID not recognized
-}
-
-// Helper function to adjust gas price calculation for different chains
-// Return value is relative to 1000 (which is the base value for Ethereum mainnet)
-// For example, 100 means 10x cheaper than Ethereum, 10000 means 10x more expensive
-function getGasPriceDivisor(chainId: number): bigint {
-  const adjustments: Record<number, number> = {
-    1: 1000,      // Ethereum Mainnet - baseline
-    10: 200,      // Optimism - usually ~5x cheaper than mainnet
-    42161: 100,   // Arbitrum - usually ~10x cheaper than mainnet
-    137: 10,      // Polygon - usually ~100x cheaper than mainnet
-    56: 50,       // BNB Chain - usually ~20x cheaper than mainnet
-    43114: 100,   // Avalanche - usually ~10x cheaper than mainnet
-    8453: 200,    // Base - usually ~5x cheaper than mainnet
-    324: 100,     // zkSync Era
-    100: 20,      // Gnosis Chain
-    42220: 50,    // Celo
-    250: 20,      // Fantom
-    1101: 50,     // Polygon zkEVM
-    5: 1000,      // Goerli testnet
-    11155111: 1000 // Sepolia testnet
-  };
-  
-  return BigInt(adjustments[chainId] || 1000); // Default to mainnet if chain ID not recognized
 }

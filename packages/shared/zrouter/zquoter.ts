@@ -180,5 +180,13 @@ export async function buildBestSwap(
 export const NATIVE_ETH: Address = "0x0000000000000000000000000000000000000000";
 
 export function isNativeETH(token: { address: string; id?: bigint }): boolean {
-  return token.address.toLowerCase() === NATIVE_ETH && token.id === undefined;
+  // The zero address with id 0 is the same thing as the zero address with no
+  // id: native ETH. Requiring `id === undefined` meant a token resolved from
+  // the token list — which publishes ETH as {standard: ERC6909, id: "0"} —
+  // was not recognised as native, and every ETH swap emitted an approve() to
+  // the zero address alongside the router call.
+  return (
+    token.address.toLowerCase() === NATIVE_ETH &&
+    (token.id === undefined || token.id === 0n)
+  );
 }

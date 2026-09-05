@@ -1,7 +1,17 @@
 import { z } from "zod";
 import { createTool } from "../client.js";
-import { SLOW_ADDRESS, slowAbi, slowTransferChains } from "./constants.js";
+import type { AgentekClient } from "../client.js";
+import { SLOW_ADDRESS, SLOW_CHAIN_ID, slowAbi, slowTransferChains } from "./constants.js";
 import { addressSchema } from "../utils.js";
+
+/**
+ * SLOW is deployed only on Base, and these tools declare only Base. They used
+ * to call `client.getPublicClient()` with no argument, which returns whichever
+ * chain happens to be first in the client's map — mainnet, for the CLI and the
+ * MCP server. A different contract occupies the same address there, so reads
+ * silently answered from the wrong chain instead of failing.
+ */
+const slowClient = (client: AgentekClient) => client.getPublicClient(SLOW_CHAIN_ID);
 
 export const getSlowStatus = createTool({
   name: "getSlowStatus",
@@ -21,9 +31,35 @@ export const getSlowStatus = createTool({
   }),
   execute: async (client, args) => {
     const { user, tokenId, transferId } = args;
-    const publicClient = client.getPublicClient();
+    const publicClient = slowClient(client);
 
-    let result = {};
+    // `user` is the only required parameter, and it used to be read out of args
+    // and never used: with neither optional id supplied the tool returned "{}".
+    // The account-level view is what the default call should answer.
+    const [guardian, lastGuardianChange] = await Promise.all([
+      publicClient.readContract({
+        address: SLOW_ADDRESS,
+        abi: slowAbi,
+        functionName: "guardians",
+        args: [user],
+      }),
+      publicClient.readContract({
+        address: SLOW_ADDRESS,
+        abi: slowAbi,
+        functionName: "lastGuardianChange",
+        args: [user],
+      }),
+    ]);
+
+    let result: Record<string, unknown> = {
+      user,
+      guardian: {
+        address: guardian,
+        hasGuardian:
+          guardian !== "0x0000000000000000000000000000000000000000",
+        lastChanged: Number(lastGuardianChange),
+      },
+    };
 
     if (tokenId) {
       const unlockedBalance = await publicClient.readContract({
@@ -80,7 +116,9 @@ export const getSlowStatus = createTool({
       };
     }
 
-    return JSON.stringify(result, null, 2);
+    // Returned as an object like every other read tool; the MCP and CLI layers
+    // do their own serialisation, so stringifying here double-encoded it.
+    return result;
   },
 });
 
@@ -96,7 +134,7 @@ export const predictTransferId = createTool({
   }),
   execute: async (client, args) => {
     const { from, to, id, amount } = args;
-    const publicClient = client.getPublicClient();
+    const publicClient = slowClient(client);
 
     const transferId = await publicClient.readContract({
       address: SLOW_ADDRESS,
@@ -118,7 +156,7 @@ export const canUnlockSlow = createTool({
   }),
   execute: async (client, args) => {
     const { transferId } = args;
-    const publicClient = client.getPublicClient();
+    const publicClient = slowClient(client);
 
     const transfer = await publicClient.readContract({
       address: SLOW_ADDRESS,
@@ -170,7 +208,7 @@ export const reverseSlowTransfer = createTool({
   }),
   execute: async (client, args) => {
     const { transferId } = args;
-    const publicClient = client.getPublicClient();
+    const publicClient = slowClient(client);
 
     const canReverse = await publicClient.readContract({
       address: SLOW_ADDRESS,
@@ -210,7 +248,7 @@ export const getSlowGuardianInfo = createTool({
   }),
   execute: async (client, args) => {
     const { user } = args;
-    const publicClient = client.getPublicClient();
+    const publicClient = slowClient(client);
 
     const guardian = await publicClient.readContract({
       address: SLOW_ADDRESS,
@@ -256,7 +294,7 @@ export const approveSlowTransfer = createTool({
   }),
   execute: async (client, args) => {
     const { user, to, id, amount } = args;
-    const publicClient = client.getPublicClient();
+    const publicClient = slowClient(client);
 
     const needsApproval = await publicClient.readContract({
       address: SLOW_ADDRESS,

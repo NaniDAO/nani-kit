@@ -26,6 +26,10 @@ export const intentDepositWETH = createTool({
     args: z.infer<typeof depositWETHParameters>,
   ): Promise<Intent> => {
     const { chainId, amount } = args;
+    // Neither of these tools reads the chain, so without this check they
+    // returned a signable intent for a chain the client can't reach and
+    // only failed at send time, after the user had approved it.
+    client.assertChainAvailable(chainId);
     const walletClient = client.getWalletClient(chainId);
 
     const valueToDeposit = parseEther(amount.toString());
@@ -73,6 +77,7 @@ export const intentWithdrawWETH = createTool({
     args: z.infer<typeof withdrawWETHParameters>,
   ): Promise<Intent> => {
     const { chainId, amount } = args;
+    client.assertChainAvailable(chainId);
 
     const walletClient = client.getWalletClient(chainId);
 

@@ -2,6 +2,7 @@ import { base } from "viem/chains";
 import { Address } from "viem";
 
 export const slowTransferChains = [base];
+export const SLOW_CHAIN_ID = base.id;
 export const SLOW_ADDRESS =
   "0x000000000000888741b254d37e1b27128afeaabc" as Address;
   
