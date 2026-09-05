@@ -14,14 +14,15 @@ import { erc20Chains } from "./constants.js";
 import { AgentekClient, createAgentekClient } from "../client.js";
 import { erc20Tools } from ".";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+import { resolveTransports } from "../chains/config.js";
 
 const publicClient = createPublicClient({
   chain: base,
-  transport: http(),
+  transport: resolveTransports([base])[0],
 });
 
 const mockClient: AgentekClient = createAgentekClient({
-  transports: [http()],
+  transports: resolveTransports([base]),
   chains: [base],
   accountOrAddress: privateKeyToAccount(generatePrivateKey()),
   tools: erc20Tools(),

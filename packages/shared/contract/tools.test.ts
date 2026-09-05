@@ -5,13 +5,14 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { createAgentekClient } from "../client.js";
 import { readContractTool, intentWriteContractTool } from "./tools.js";
 import { contractTools } from "./index.js";
+import { resolveTransports } from "../chains/config.js";
 
 const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const USDC_MAINNET = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const TEST_ADDRESS = "0xCB0592589602B841BE035e1e64C2A5b1Ef006aa2";
 
 const mockClient = createAgentekClient({
-  transports: [http()],
+  transports: resolveTransports([mainnet, base]),
   chains: [mainnet, base],
   accountOrAddress: privateKeyToAccount(generatePrivateKey()),
   tools: contractTools(),
@@ -68,7 +69,7 @@ describe("Contract Tools", () => {
   describe("intentWriteContract", () => {
     it("should return an intent without wallet", async () => {
       const readOnlyClient = createAgentekClient({
-        transports: [http()],
+        transports: resolveTransports([mainnet]),
         chains: [mainnet],
         accountOrAddress: TEST_ADDRESS,
         tools: contractTools(),
@@ -99,7 +100,7 @@ describe("Contract Tools", () => {
 
     it("should include ETH value when specified", async () => {
       const readOnlyClient = createAgentekClient({
-        transports: [http()],
+        transports: resolveTransports([base]),
         chains: [base],
         accountOrAddress: TEST_ADDRESS,
         tools: contractTools(),
@@ -128,7 +129,7 @@ describe("Contract Tools", () => {
 
     it("should auto-fetch ABI for write intents", async () => {
       const readOnlyClient = createAgentekClient({
-        transports: [http()],
+        transports: resolveTransports([base]),
         chains: [base],
         accountOrAddress: TEST_ADDRESS,
         tools: contractTools(),

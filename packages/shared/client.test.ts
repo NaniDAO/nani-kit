@@ -4,6 +4,7 @@ import { mainnet, sepolia } from "viem/chains";
 import { http } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import z from "zod";
+import { resolveTransports } from "./chains/config.js";
 
 describe("AgentekClient", () => {
   let client: AgentekClient;
@@ -22,7 +23,7 @@ describe("AgentekClient", () => {
     const account = privateKeyToAccount(privateKey);
 
     client = createAgentekClient({
-      transports: [http()],
+      transports: resolveTransports([mainnet, sepolia]),
       chains: [mainnet, sepolia],
       accountOrAddress: account,
       tools: [mockTool],

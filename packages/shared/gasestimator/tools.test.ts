@@ -39,8 +39,7 @@ describe("estimateGasCostTool", () => {
       nativeSymbol: "ETH"
     });
     
-    // Check that the total cost calculation works with divisor of 1000
-    // (21000 * 2 gwei * 1000 / 1000) = 42000 gwei = 0.000042 ETH
+    // gas units × the chain's live fee: (21000 * 2 gwei) = 42000 gwei
     expect(parseFloat(result.totalCost)).toBeCloseTo(0.000042);
     
     // Check USD calculation (0.000042 ETH * $3000 = $0.126)
@@ -64,9 +63,12 @@ describe("estimateGasCostTool", () => {
       nativeSymbol: "MATIC"
     });
     
-    // Check that the total cost calculation works with divisor of 10
-    // (21000 * 2 gwei * 10 / 1000) = 420 gwei = 0.00000042 ETH
-    expect(parseFloat(result.totalCost)).toBeCloseTo(0.00000042, 8);
+    // Same gas price as mainnet in this mock, so the same cost: the estimate is
+    // gas units × the chain's own live fee. It used to be divided again by a
+    // hard-coded "Polygon is ~100x cheaper" factor, which this test asserted
+    // and which understated every non-mainnet chain.
+    // (21000 * 2 gwei) = 42000 gwei = 0.000042 POL
+    expect(parseFloat(result.totalCost)).toBeCloseTo(0.000042, 8);
   });
 
   it("should use provided gas values when specified", async () => {

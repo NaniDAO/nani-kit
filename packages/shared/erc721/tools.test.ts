@@ -5,14 +5,15 @@ import { getNFTMetadataTool } from "./tools.js";
 import { type AgentekClient, createAgentekClient } from "../client.js";
 import { nftTools } from "./index.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+import { resolveTransports } from "../chains/config.js";
 
 const publicClient = createPublicClient({
   chain: mainnet,
-  transport: http(),
+  transport: resolveTransports([mainnet])[0],
 });
 
 const mockClient: AgentekClient = createAgentekClient({
-  transports: [http()],
+  transports: resolveTransports([mainnet]),
   chains: [mainnet],
   accountOrAddress: privateKeyToAccount(generatePrivateKey()),
   tools: nftTools(),

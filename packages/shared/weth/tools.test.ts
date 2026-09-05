@@ -4,6 +4,7 @@ import { mainnet, base } from "viem/chains";
 import { wethTools } from "./index.js";
 import { intentDepositWETH, intentWithdrawWETH } from "./intents.js";
 import { WETH_ADDRESS, wethAbi, supportedChains } from "./constants.js";
+import { resolveTransports } from "../chains/config.js";
 import {
   createTestClient,
   createReadOnlyTestClient,
@@ -268,12 +269,12 @@ describe("WETH Tools", () => {
   describe("WETH Contract Read Operations", () => {
     const publicClient = createPublicClient({
       chain: mainnet,
-      transport: http(),
+      transport: resolveTransports([mainnet])[0],
     });
 
     const basePublicClient = createPublicClient({
       chain: base,
-      transport: http(),
+      transport: resolveTransports([base])[0],
     });
 
     // Extended ABI for read operations

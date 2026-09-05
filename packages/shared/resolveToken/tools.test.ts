@@ -5,9 +5,10 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { createAgentekClient } from "../client.js";
 import { resolveTokenTool } from "./tools.js";
 import { resolveTokenTools } from "./index.js";
+import { resolveTransports } from "../chains/config.js";
 
 const mockClient = createAgentekClient({
-  transports: [http()],
+  transports: resolveTransports([mainnet, base, arbitrum, optimism]),
   chains: [mainnet, base, arbitrum, optimism],
   accountOrAddress: privateKeyToAccount(generatePrivateKey()),
   tools: resolveTokenTools(),

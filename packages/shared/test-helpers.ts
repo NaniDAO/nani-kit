@@ -5,8 +5,9 @@
  * Tests may fail if APIs are down or rate limited - that's intentional.
  */
 
-import { http, createPublicClient, type Address, type Hex, isAddress, isHex } from "viem";
+import { createPublicClient, type Address, type Hex, isAddress, isHex } from "viem";
 import { mainnet, base, arbitrum, optimism, polygon } from "viem/chains";
+import { resolveTransports } from "./chains/config.js";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { createAgentekClient, type AgentekClient, type BaseTool, type Intent, type Op, isTransactionOp } from "./client.js";
 
@@ -25,7 +26,7 @@ export const TEST_ADDRESSES = {
   },
   // DAI
   dai: {
-    mainnet: "0x6B175474E89094C44Da98b954EesfdcDFE65Acb4" as Address,
+    mainnet: "0x6B175474E89094C44Da98b954EedeAC495271d0F" as Address,
   },
   // WETH
   weth: {
@@ -64,7 +65,7 @@ export function createTestClient(tools: BaseTool[], chains = TEST_CHAINS): Agent
   const account = privateKeyToAccount(privateKey);
 
   return createAgentekClient({
-    transports: chains.map(() => http()),
+    transports: resolveTransports(chains),
     chains,
     accountOrAddress: account,
     tools,
@@ -76,7 +77,7 @@ export function createTestClient(tools: BaseTool[], chains = TEST_CHAINS): Agent
  */
 export function createReadOnlyTestClient(tools: BaseTool[], chains = TEST_CHAINS): AgentekClient {
   return createAgentekClient({
-    transports: chains.map(() => http()),
+    transports: resolveTransports(chains),
     chains,
     accountOrAddress: TEST_ADDRESSES.vitalik, // Use vitalik's address for read-only
     tools,
@@ -92,7 +93,7 @@ export function getPublicClient(chainId: number) {
 
   return createPublicClient({
     chain,
-    transport: http(),
+    transport: resolveTransports([chain])[0],
   });
 }
 

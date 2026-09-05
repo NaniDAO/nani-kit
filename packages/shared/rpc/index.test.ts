@@ -12,6 +12,7 @@ import {
   getTransaction,
   getTransactionReceipt,
 } from "./tools.js";
+import { intentSendTransaction } from "./intents.js";
 
 describe("RPC Tools Collection", () => {
   const tools = rpcTools();
@@ -28,6 +29,7 @@ describe("RPC Tools Collection", () => {
       getFeeHistory,
       getTransaction,
       getTransactionReceipt,
+      intentSendTransaction,
     ];
 
     expect(tools).toHaveLength(expectedTools.length);

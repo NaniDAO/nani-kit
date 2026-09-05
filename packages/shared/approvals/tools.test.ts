@@ -8,11 +8,12 @@ import {
   intentRevokeApprovalTool,
 } from "./tools.js";
 import { approvalTools } from "./index.js";
+import { resolveTransports } from "../chains/config.js";
 
 const TEST_ADDRESS = "0xCB0592589602B841BE035e1e64C2A5b1Ef006aa2";
 
 const mockClient = createAgentekClient({
-  transports: [http()],
+  transports: resolveTransports([mainnet, base]),
   chains: [mainnet, base],
   accountOrAddress: privateKeyToAccount(generatePrivateKey()),
   tools: approvalTools(),
@@ -94,7 +95,7 @@ describe("Approvals Tools", () => {
   describe("intentRevokeApproval", () => {
     it("should return a revoke intent without wallet", async () => {
       const readOnlyClient = createAgentekClient({
-        transports: [http()],
+        transports: resolveTransports([mainnet]),
         chains: [mainnet],
         accountOrAddress: TEST_ADDRESS,
         tools: approvalTools(),

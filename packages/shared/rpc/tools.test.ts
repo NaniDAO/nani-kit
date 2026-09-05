@@ -14,6 +14,7 @@ import {
   getTransactionReceipt,
 } from "./tools.js";
 import { rpcTools } from "./index.js";
+import { resolveTransports } from "../chains/config.js";
 import {
   createTestClient,
   TEST_ADDRESSES,
@@ -27,12 +28,12 @@ const testClient = createTestClient(tools, [base, mainnet]);
 // Standalone public clients for verification
 const basePublicClient = createPublicClient({
   chain: base,
-  transport: http(),
+  transport: resolveTransports([base])[0],
 });
 
 const mainnetPublicClient = createPublicClient({
   chain: mainnet,
-  transport: http(),
+  transport: resolveTransports([mainnet])[0],
 });
 
 // Well-known transaction hashes for testing (real confirmed transactions)

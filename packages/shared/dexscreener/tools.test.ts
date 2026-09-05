@@ -27,7 +27,7 @@ describe("DexScreener Tools", () => {
     it("getLatestTokens should have correct name and description", () => {
       expect(getLatestTokens.name).toBe("getLatestTokens");
       expect(getLatestTokens.description).toBe(
-        "Get trending tokens and market data"
+        "Get trending tokens from Dexscreener with market data including USD price, 24h volume, and 24h price change. Filters by the specified chain."
       );
     });
 
@@ -194,8 +194,11 @@ describe("DexScreener Tools", () => {
         expect(response.ok).toBe(true);
         expect(response.status).toBe(200);
 
+        // /tokens/v1/{chain}/{addresses} answers with a bare array of pairs,
+        // not { pairs: [...] }. The tool used to read `.pairs` off it, which is
+        // why every price it reported was "0".
         const data = await response.json();
-        expect(data).toHaveProperty("pairs");
+        expect(Array.isArray(data)).toBe(true);
       },
       15000
     );
@@ -211,11 +214,10 @@ describe("DexScreener Tools", () => {
         expect(response.ok).toBe(true);
 
         const data = await response.json();
-        expect(data).toHaveProperty("pairs");
-        expect(Array.isArray(data.pairs)).toBe(true);
+        expect(Array.isArray(data)).toBe(true);
 
-        if (data.pairs.length > 0) {
-          const pair = data.pairs[0];
+        if (data.length > 0) {
+          const pair = data[0];
           expect(pair).toHaveProperty("baseToken");
           expect(pair).toHaveProperty("quoteToken");
           expect(pair).toHaveProperty("priceUsd");
