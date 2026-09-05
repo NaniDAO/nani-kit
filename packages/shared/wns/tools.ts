@@ -213,23 +213,27 @@ export const intentRegisterWNSTool = createTool({
     const commitTx = wns.encodeCommit(commitment);
     const revealTx = wns.encodeReveal(args.label, args.secret, BigInt(args.value));
 
+    // Returned as {intent, ops, chain} like every other intent in the library.
+    // The custom {intent, steps} shape left this tool outside the Intent type
+    // it declares, so anything iterating `ops` found undefined and silently
+    // executed neither half of the commit-reveal.
     return {
       intent: `Register ${args.label}.wei`,
-      steps: [
+      ops: [
+        { target: commitTx.to, data: commitTx.data, value: "0" },
         {
-          step: "commit",
-          description: "Submit commitment hash (wait ~60s before reveal)",
-          tx: { to: commitTx.to, data: commitTx.data, value: "0" },
+          target: revealTx.to,
+          data: revealTx.data,
+          value: revealTx.value?.toString() ?? args.value,
         },
-        {
-          step: "reveal",
-          description: "Reveal and complete registration",
-          tx: {
-            to: revealTx.to,
-            data: revealTx.data,
-            value: revealTx.value?.toString() ?? args.value,
-          },
-        },
+      ],
+      chain: 1,
+      // Registration is commit-reveal: the two ops are ordered and the reveal
+      // is rejected until the commitment has aged. Callers that submit ops
+      // back-to-back need to know that.
+      notes: [
+        "Op 1 submits the commitment hash.",
+        "Wait at least 60 seconds before submitting op 2, or the reveal reverts.",
       ],
     };
   },

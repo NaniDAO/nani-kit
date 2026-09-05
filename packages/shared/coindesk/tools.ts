@@ -41,7 +41,13 @@ export const createCoindeskNewsTool = (apiKey: string) => {
         const response = await fetch(url.toString(), options);
         await assertOkResponse(response, "Coindesk API error");
         const json = await response.json();
-        return { articles: json.articles || [] };
+        if (json?.Err && Object.keys(json.Err).length > 0) {
+          throw new Error(json.Err.message || JSON.stringify(json.Err));
+        }
+        // The API answers with a top-level `Data` array. Reading `json.articles`
+        // always yielded undefined, so a successful call returned an empty list
+        // and the failure looked like a slow news day.
+        return { articles: Array.isArray(json?.Data) ? json.Data : [] };
       } catch (err) {
         throw new Error(
           `Failed to fetch latest Coindesk news articles: ${err}`,

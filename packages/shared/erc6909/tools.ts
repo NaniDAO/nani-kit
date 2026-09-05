@@ -30,10 +30,12 @@ export const getCoinTokenMetadata = createTool({
         functionName: "symbol",
         args: [tokenIdBigInt],
       }),
+      // The Coins contract exposes tokenURI(uint256); there is no `uri`, so
+      // this threw "Function 'uri' not found on ABI" before any RPC call.
       publicClient.readContract({
         address: COINS_ADDRESS,
         abi: coinsAbi,
-        functionName: "uri",
+        functionName: "tokenURI",
         args: [tokenIdBigInt],
       }),
     ]);

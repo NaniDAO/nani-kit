@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTool } from "../client.js";
-import { ZAMM_API } from "./constants.js";
+import { zammFetch, zammGraphql } from "./constants.js";
 import { formatEther } from "viem";
 import { addressSchema } from "../utils.js";
 
@@ -14,10 +14,11 @@ export const getCoin = createTool({
   }),
   execute: async (_client, args) => {
     // fetch coin by symbol (case-insensitive match)
-    const res = await fetch(ZAMM_API + `/api/resolve?ticker=${args.symbol}`);
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || "Failed to fetch coin");
-    const data = json.data;
+    const json = await zammFetch(
+      `/api/resolve?ticker=${encodeURIComponent(args.symbol)}`,
+    );
+    const data = json?.data;
+    if (!data) throw new Error(`No ZAMM coin found for ticker "${args.symbol}"`);
 
     return {
       ...data,
@@ -55,10 +56,8 @@ export const getHolders = createTool({
       limit: args.limit.toString(),
       offset: args.offset.toString(),
     });
-    const res = await fetch(ZAMM_API + `/api/holders?${params}`);
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || "Failed to fetch holders");
-    return json.data;
+    const json = await zammFetch(`/api/holders?${params}`);
+    return json?.data ?? [];
   },
 });
 
@@ -77,10 +76,7 @@ export const getAccountPortfolio = createTool({
     const params = new URLSearchParams({
       address: args.address,
     });
-    const res = await fetch(ZAMM_API + `/api/portfolio?${params}`);
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || "Failed to fetch holders");
-    return json;
+    return await zammFetch(`/api/portfolio?${params}`);
   },
 });
 
@@ -118,19 +114,10 @@ export const getPool = createTool({
       }
     `;
 
-    const res = await fetch(ZAMM_API + '/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
-    });
+    const data = await zammGraphql(query);
 
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || "Failed to fetch pool");
-
-    const pool = json.data.pool;
-    if (!pool) throw new Error("Pool not found");
+    const pool = data?.pool;
+    if (!pool) throw new Error(`ZAMM pool ${args.poolId} not found`);
 
     // Flatten the response
     return {
@@ -206,19 +193,10 @@ export const getSwaps = createTool({
       }
     `;
 
-    const res = await fetch(ZAMM_API + '/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
-    });
-
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || "Failed to fetch swaps");
+    const data = await zammGraphql(query);
 
     // Transform the data to flatten coin symbol information
-    const swaps = json.data.swaps.items.map((swap) => ({
+    const swaps = (data?.swaps?.items ?? []).map((swap: any) => ({
       ...swap,
       coin0Symbol: swap.pool.coin0.symbol,
       coin1Symbol: swap.pool.coin1.symbol,

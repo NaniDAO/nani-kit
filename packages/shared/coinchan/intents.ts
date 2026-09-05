@@ -15,7 +15,7 @@ export const intentCoinchanMake = createTool({
     tokenURI: z.string().describe("A valid URL to token metadata like name, description, and image url"),
     poolSupply: z.string().describe("Amount of token to add to pool in human readable format"),
     ownerSupply: z.string().describe("Amount of token to transfer to owner in human readable format"),
-    swapFee: z.number().describe("Swap fee for the pool e.g. 100 for 1%"),
+    swapFee: z.number().describe("Swap fee for the pool in basis points (e.g. 100 for 1%)"),
     owner: addressSchema.describe("Address receiving owner supply and pool liquidity"),
     value: z.string().describe("Native token value in human readable Ether format representing liquidity funded")
   }),
@@ -70,7 +70,7 @@ export const intentCoinchanMakeLocked = createTool({
     creator: addressSchema.describe("Ethereum address of the creator"),
     unlockPeriod: z.number().describe("Number of days until liquidity unlock (e.g. 180)"),
     vesting: z.boolean().describe("Whether to enable linear vesting of locked liquidity over the unlock period"),
-    value: z.string().describe("Native ETH value in wei as a decimal string to fund initial liquidity"),
+    value: z.string().describe("Native token value in human readable Ether format representing liquidity funded"),
   }),
   execute: async (client, args) => {
     const { chainId, name, symbol, tokenURI, poolSupply, creatorSupply, swapFee, creator, unlockPeriod, vesting, value } = args;
@@ -91,7 +91,7 @@ export const intentCoinchanMakeLocked = createTool({
       unlockTime,
       vesting
     ]});
-    ops.push({ target: CoinchanAddress as Address, value: BigInt(value).toString(), data: data as Hex });
+    ops.push({ target: CoinchanAddress as Address, value: parseEther(value).toString(), data: data as Hex });
 
     const intentDescription = `Make coin ${symbol} with locked liquidity`;
     const walletClient = client.getWalletClient(chainId);
@@ -138,9 +138,9 @@ export const intentCoinchanMakeHold = createTool({
     tokenURI: z.string().describe("A valid URL to token metadata like name, description, and image url"),
     poolSupply: z.string().describe("Amount of token to add to pool in wei as a decimal string"),
     creatorSupply: z.string().describe("Amount of token to transfer to creator in wei as a decimal string"),
-    swapFee: z.string().describe("Swap fee for the pool as a decimal string (e.g. '100' for 1%)"),
+    swapFee: z.number().describe("Swap fee for the pool in basis points (e.g. 100 for 1%)"),
     creator: addressSchema.describe("Ethereum address of the creator"),
-    value: z.string().describe("Native ETH value in wei as a decimal string to fund initial liquidity"),
+    value: z.string().describe("Native token value in human readable Ether format representing liquidity funded"),
   }),
   execute: async (client, args) => {
     const { chainId, name, symbol, tokenURI, poolSupply, creatorSupply, swapFee, creator, value } = args;
@@ -158,7 +158,7 @@ export const intentCoinchanMakeHold = createTool({
         creator
       ]
     });
-    ops.push({ target: CoinchanAddress as Address, value: BigInt(value).toString(), data: data as Hex });
+    ops.push({ target: CoinchanAddress as Address, value: parseEther(value).toString(), data: data as Hex });
 
     const intentDescription = `Create coin ${symbol} and hold liquidity`;
     const walletClient = client.getWalletClient(chainId);
