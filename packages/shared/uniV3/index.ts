@@ -1,4 +1,6 @@
 import { BaseTool, createToolCollection } from "../client.js";
+import { discoverLPPositionsTool } from "./discovery.js";
+export { discoverLPPositionsTool } from "./discovery.js";
 import {
   intentMintPosition,
   intentIncreaseLiquidity,
@@ -15,6 +17,7 @@ import {
 
 export function uniV3Tools(): BaseTool[] {
   return createToolCollection([
+    discoverLPPositionsTool,
     // read
     getUniV3Pool,
     getUserPositions,
