@@ -20,6 +20,7 @@ export function assessRisk(apy: number): RiskLevel {
 export function getChainName(chainId: number): string {
   const chainMap: Record<number, string> = {
     1: 'Ethereum',
+    4663: 'Robinhood Chain',
     10: 'Optimism',
     137: 'Polygon',
     42161: 'Arbitrum',
@@ -47,6 +48,8 @@ export function calculateProjectedEarnings(amount: number, apy: number, days: nu
 // Chain ID mapping for DefiLlama
 export const chainIdMap: Record<string, number> = {
   'Ethereum': 1,
+  'Robinhood Chain': 4663,
+  'Robinhood': 4663,
   'Optimism': 10,
   'Polygon': 137,
   'Arbitrum': 42161,

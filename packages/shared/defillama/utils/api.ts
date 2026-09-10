@@ -69,11 +69,11 @@ export async function fetchProtocolData(protocol: YieldProtocol, chainId?: numbe
         symbol: pool.symbol,
         apy: apyValue,
         tvl: pool.tvlUsd,
-        chain: chainIdMap[pool.chain] || 1, // Default to Ethereum if chain not found
+        chain: chainIdMap[pool.chain] ?? 0, // Unknown identity must never become Ethereum
         risk: assessRisk(apyValue),
       };
     });
   } catch (error) {
-    return [];
+    throw error;
   }
 }

@@ -1,6 +1,8 @@
 import { Chain, mainnet, optimism, arbitrum, base, polygon } from 'viem/chains';
 
-export const SUPPORTED_CHAINS: Chain[] = [mainnet, optimism, arbitrum, base, polygon];
+import { robinhood } from '../chains/robinhood.js';
+
+export const SUPPORTED_CHAINS: Chain[] = [mainnet, optimism, arbitrum, base, polygon, robinhood];
 
 export const SUPPORTED_YIELD_PROTOCOLS = [
   'Aave',
