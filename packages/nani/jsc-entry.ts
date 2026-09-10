@@ -49,6 +49,8 @@ import { resolveTokenTools } from "../shared/resolveToken/index.js";
 import { approvalTools } from "../shared/approvals/index.js";
 import { contractTools } from "../shared/contract/index.js";
 import { readOnlyChainTools } from "../shared/readonlyChains/index.js";
+// Not ../shared/x402/index.js: that path signs and pays inside JavaScript.
+import { x402NaniTools } from "../shared/x402/payments.js";
 import { researchCATools } from "../shared/researchCA/index.js";
 import { robinhood } from "../shared/chains/robinhood.js";
 
@@ -108,6 +110,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
     ...researchCATools(),
     ...readOnlyChainTools(),
     ...credentialTools(enabledCredentials),
+    ...x402NaniTools(),
   ];
 
   agentekClient = createAgentekClient({
