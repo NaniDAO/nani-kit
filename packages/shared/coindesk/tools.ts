@@ -46,8 +46,11 @@ export const createCoindeskNewsTool = (apiKey: string) => {
         }
         // The API answers with a top-level `Data` array. Reading `json.articles`
         // always yielded undefined, so a successful call returned an empty list
-        // and the failure looked like a slow news day.
-        return { articles: Array.isArray(json?.Data) ? json.Data : [] };
+        // and the failure looked like a slow news day. An unrecognized shape is
+        // an error, not an empty result.
+        const articles = Array.isArray(json?.Data) ? json.Data : json?.Data?.LIST ?? json?.articles;
+        if (!Array.isArray(articles)) throw new Error("CoinDesk returned an unexpected news response");
+        return { articles };
       } catch (err) {
         throw new Error(
           `Failed to fetch latest Coindesk news articles: ${err}`,

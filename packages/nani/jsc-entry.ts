@@ -44,7 +44,7 @@ import { thinkTools } from "../shared/think/index.js";
 import { zammTools } from "../shared/zamm/index.js";
 import { zrouterTools } from "../shared/zrouter/index.js";
 import { wnsTools } from "../shared/wns/index.js";
-import { searchTools } from "../shared/search/index.js";
+import { credentialTools, installCredentialTransport } from "../shared/credentialTools/index.js";
 import { resolveTokenTools } from "../shared/resolveToken/index.js";
 import { approvalTools } from "../shared/approvals/index.js";
 import { contractTools } from "../shared/contract/index.js";
@@ -56,6 +56,10 @@ interface NaniSolanaConfig {
   address?: string;
   rpcUrl?: string;
   jupiterApiKey?: string;
+}
+
+if ((globalThis as any).webkit?.messageHandlers?.agentekCredentials) {
+  installCredentialTransport(request => (globalThis as any).webkit.messageHandlers.agentekCredentials.postMessage(request));
 }
 
 const TOOL_TIMEOUT_MS = 120_000;
@@ -81,6 +85,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   accountAddress?: string,
   rpcUrlsByChainId?: Record<string, string>,
   solana?: NaniSolanaConfig,
+  enabledCredentials: string[] = [],
 ): number => {
   const chains = [mainnet, optimism, arbitrum, polygon, base, robinhood, sepolia];
   const transports = chains.map((chain) => {
@@ -102,6 +107,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
     ...resolveTokenTools(), ...approvalTools(), ...contractTools(),
     ...researchCATools(),
     ...readOnlyChainTools(),
+    ...credentialTools(enabledCredentials),
   ];
 
   agentekClient = createAgentekClient({
