@@ -48,7 +48,7 @@ import { searchTools } from "../shared/search/index.js";
 import { resolveTokenTools } from "../shared/resolveToken/index.js";
 import { approvalTools } from "../shared/approvals/index.js";
 import { contractTools } from "../shared/contract/index.js";
-import { solanaMarketTools } from "../shared/solana/market-tools.js";
+import { readOnlyChainTools } from "../shared/readonlyChains/index.js";
 import { researchCATools } from "../shared/researchCA/index.js";
 import { robinhood } from "../shared/chains/robinhood.js";
 
@@ -101,10 +101,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
     ...thinkTools(), ...zammTools(), ...zrouterTools(), ...wnsTools(),
     ...resolveTokenTools(), ...approvalTools(), ...contractTools(),
     ...researchCATools(),
-    ...solanaMarketTools({
-      includeJupiter: true,
-      includeIntents: false,
-    }),
+    ...readOnlyChainTools(),
   ];
 
   agentekClient = createAgentekClient({
