@@ -1,4 +1,6 @@
 import { BaseTool, createToolCollection } from "../client.js";
+import { observeLPPositionTool } from "./observation.js";
+export { observeLPPositionTool } from "./observation.js";
 import { discoverLPPositionsTool } from "./discovery.js";
 export { discoverLPPositionsTool } from "./discovery.js";
 import {
@@ -17,6 +19,7 @@ import {
 
 export function uniV3Tools(): BaseTool[] {
   return createToolCollection([
+    observeLPPositionTool,
     discoverLPPositionsTool,
     // read
     getUniV3Pool,
