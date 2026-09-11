@@ -1,18 +1,25 @@
+import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {getYieldPoolEvidence,getYieldTool,compareYieldTool,getYieldHistoryTool,compareYieldHistoryTool} from '../packages/shared/defillama/research';
 import {getAcrossRoutes,getAcrossFeeQuote,intentDepositAcross} from '../packages/shared/across/bridge';
 import {decodeFunctionData,erc20Abi} from 'viem';
-import {acrossSpokePoolAbi} from '../packages/shared/across/constants';
+import {acrossSpokePoolAbi,ACROSS_SPOKE_POOL_ADDRESS} from '../packages/shared/across/constants';
+let activeFixture:any=null, quoteMutation:any={};
 let requests:string[]=[];
 let pools:any[]=[{pool:'rh-pool',chain:'Robinhood Chain',project:'ekubo',symbol:'ETH-USDG',apy:4000,apyBase:null,apyReward:4000,tvlUsd:11000,apyPct1D:null,predictions:{predictedClass:null,predictedProbability:null}}, {pool:'eth-pool',chain:'Ethereum',project:'aave-v3',symbol:'USDC',apy:3,tvlUsd:10000000,stablecoin:true}];
 let responseStatus=200, malformedFee=false, allowance=0n, decimals=18, native=false, noRoutes=false;
 const owner='0x1111111111111111111111111111111111111111',token='0x2222222222222222222222222222222222222222',other='0x3333333333333333333333333333333333333333';
 globalThis.fetch=async(input:any)=> {
- const url=String(input);requests.push(url);
+ const url=String(input);requests.push(url);const params=new URL(url).searchParams;const from=Number(params.get('originChainId')),to=Number(params.get('destinationChainId'));
  if(responseStatus!==200)return new Response('{}',{status:responseStatus});
  let data:any;
- if(url.includes('/available-routes')) data=noRoutes?[]:[{originChainId:1,destinationChainId:8453,originToken:token,destinationToken:other,originTokenSymbol:'WETH',destinationTokenSymbol:'WETH',isNative:native}];
- else if(url.includes('/suggested-fees')) data={totalRelayFee:malformedFee?undefined:{total:'100'},timestamp:Math.floor(Date.now()/1000),exclusiveRelayer:owner,exclusivityDeadline:0};
+ if(activeFixture && url.includes('/available-routes')) return new Response(JSON.stringify([activeFixture.route]));
+ if(activeFixture && url.includes('/suggested-fees')) {
+   const original=activeFixture.response,now=Math.floor(Date.now()/1000);
+   return new Response(JSON.stringify({...original,timestamp:String(now),fillDeadline:String(now+Number(original.fillDeadline)-Number(original.timestamp)),...quoteMutation}));
+ }
+ if(url.includes('/available-routes')) data=noRoutes?[]:[{originChainId:from,destinationChainId:to,originToken:token,destinationToken:other,originTokenSymbol:'WETH',destinationTokenSymbol:'WETH',isNative:native}];
+ else if(url.includes('/suggested-fees')) data={totalRelayFee:malformedFee?undefined:{total:'100'},timestamp:Math.floor(Date.now()/1000),exclusiveRelayer:owner,exclusivityDeadline:0,outputAmount:(BigInt(params.get('amount')!)-100n).toString(),spokePoolAddress:ACROSS_SPOKE_POOL_ADDRESS[from],destinationSpokePoolAddress:ACROSS_SPOKE_POOL_ADDRESS[to],inputToken:{address:token,chainId:from,decimals},outputToken:{address:other,chainId:to,decimals}};
  else if(url.includes('/chart/')) data={data:[{timestamp:new Date(Date.now()-86400000).toISOString(),apy:10,tvlUsd:10},{timestamp:new Date().toISOString(),apy:null,tvlUsd:null}]};
  else data={data:pools};
  return new Response(JSON.stringify(data),{status:200});
@@ -38,7 +45,23 @@ malformedFee=true;await assert.rejects(()=>call(getAcrossFeeQuote,{...args,isNat
 noRoutes=true;assert.equal((await call(getAcrossRoutes,args)).routes.length,0);await assert.rejects(()=>call(getAcrossFeeQuote,args),/No live/);noRoutes=false;
 await assert.rejects(()=>call(intentDepositAcross,{...args,recipient:other}),/same wallet/);
 await assert.rejects(()=>call(getAcrossFeeQuote,{...args,isNative:true,amount:'0.0000000000000000001'}),/precision/);
-await assert.rejects(()=>call(getAcrossFeeQuote,{...args,originChainId:4663}),/deployment/);
+assert.equal((await call(getAcrossFeeQuote,{...args,originChainId:4663,isNative:true})).spokePool,ACROSS_SPOKE_POOL_ADDRESS[4663]);
 pools[0].underlyingTokens=[token,'invalid'];
 const evidence=await call(getYieldPoolEvidence,{chainId:4663,poolId:'rh-pool'});assert.equal(evidence.project,'ekubo');assert.equal(evidence.complete,false);assert.equal(evidence.tokenChecks[0].codePresent,true);assert.equal(evidence.poolContractVerified,false);
 console.log('Yield and Across shared-source offline fixtures passed; no network or signing.');
+
+const fixtures=JSON.parse(readFileSync(new URL('./fixtures/across-robinhood-2026-09-11.json',import.meta.url),'utf8'));
+for(const fixture of fixtures) {
+ activeFixture=fixture;decimals=fixture.response.inputToken.decimals;
+ const r=fixture.route;
+ const request={originChainId:r.originChainId,destinationChainId:r.destinationChainId,inputToken:r.originToken,outputToken:r.destinationToken,recipient:owner,isNative:r.isNative,amount:decimals===18?'0.01':'100'};
+ const intent=await call(intentDepositAcross,request);
+ assert.equal(intent.bridge.outputAmountRaw,fixture.response.outputAmount);
+ assert.equal(intent.bridge.destinationSpokePool.toLowerCase(),fixture.response.destinationSpokePoolAddress.toLowerCase());
+ assert.equal(intent.bridge.route.outputSymbol,r.destinationTokenSymbol);
+ for(const mutation of [{outputAmount:'1'},{outputAmount:undefined},{spokePoolAddress:other},{destinationSpokePoolAddress:other},{outputToken:{...fixture.response.outputToken,chainId:999}},{inputToken:{...fixture.response.inputToken,decimals:7}}]) {
+   quoteMutation=mutation;await assert.rejects(()=>call(getAcrossFeeQuote,request));
+ }
+ quoteMutation={};
+}
+console.log('Replayed all 25 live Robinhood route fixtures; altered payout, deployment and token metadata rejected.');

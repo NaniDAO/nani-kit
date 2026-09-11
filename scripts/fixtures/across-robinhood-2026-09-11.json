@@ -1,0 +1,1952 @@
+[
+  {
+    "route": {
+      "originChainId": 1,
+      "originToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "destinationChainId": 4663,
+      "destinationToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originTokenSymbol": "WETH",
+      "destinationTokenSymbol": "WETH",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "outputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originChainId": 1,
+      "destinationChainId": 4663,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 2,
+      "capitalFeePct": "69708333333400",
+      "capitalFeeTotal": "697083333334",
+      "relayGasFeePct": "2524472208030000",
+      "relayGasFeeTotal": "25244722080300",
+      "relayFeePct": "2594180541363400",
+      "relayFeeTotal": "25941805413634",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 1789124307,
+      "spokePoolAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "2594180541363400",
+        "total": "25941805413634"
+      },
+      "relayerCapitalFee": {
+        "pct": "69708333333400",
+        "total": "697083333334"
+      },
+      "relayerGasFee": {
+        "pct": "2524472208030000",
+        "total": "25244722080300"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "287582733360999395843",
+        "maxDepositInstant": "287582733360999395843",
+        "maxDepositShortDelay": "287582733360999395843",
+        "recommendedDepositInstant": "287582733360999395843"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9974058194586366",
+      "inputToken": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 1
+      },
+      "outputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "id": "99b8d-1789124284294-75f741b9a026"
+    },
+    "observedAt": "2026-09-11T10:58:04.515591+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 1,
+      "originToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "destinationChainId": 4663,
+      "destinationToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originTokenSymbol": "ETH",
+      "destinationTokenSymbol": "ETH",
+      "isNative": true
+    },
+    "request": {
+      "inputToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "outputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originChainId": 1,
+      "destinationChainId": 4663,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 2,
+      "capitalFeePct": "69708333333400",
+      "capitalFeeTotal": "697083333334",
+      "relayGasFeePct": "2524472208030000",
+      "relayGasFeeTotal": "25244722080300",
+      "relayFeePct": "2594180541363400",
+      "relayFeeTotal": "25941805413634",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0x0000000000000000000000000000000000000000",
+      "exclusivityDeadline": 0,
+      "spokePoolAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "2594180541363400",
+        "total": "25941805413634"
+      },
+      "relayerCapitalFee": {
+        "pct": "69708333333400",
+        "total": "697083333334"
+      },
+      "relayerGasFee": {
+        "pct": "2524472208030000",
+        "total": "25244722080300"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "287582733360999395843",
+        "maxDepositInstant": "287582733360999395843",
+        "maxDepositShortDelay": "287582733360999395843",
+        "recommendedDepositInstant": "287582733360999395843"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9974058194586366",
+      "inputToken": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 1
+      },
+      "outputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "id": "vxqvz-1789124284294-41be297d7b69"
+    },
+    "observedAt": "2026-09-11T10:58:04.507258+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 1,
+      "originToken": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "destinationChainId": 4663,
+      "destinationToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "originTokenSymbol": "USDC",
+      "destinationTokenSymbol": "USDG",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "outputToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "originChainId": 1,
+      "destinationChainId": 4663,
+      "amount": "100000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 2,
+      "capitalFeePct": "100000000000000",
+      "capitalFeeTotal": "10000",
+      "relayGasFeePct": "397650000000000",
+      "relayGasFeeTotal": "39765",
+      "relayFeePct": "1097650000000000",
+      "relayFeeTotal": "109735",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 1789124307,
+      "spokePoolAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "1097650000000000",
+        "total": "109735"
+      },
+      "relayerCapitalFee": {
+        "pct": "100000000000000",
+        "total": "10000"
+      },
+      "relayerGasFee": {
+        "pct": "397650000000000",
+        "total": "39765"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "600000000000000",
+        "total": "59970"
+      },
+      "limits": {
+        "minDeposit": "500106",
+        "maxDeposit": "118743795764",
+        "maxDepositInstant": "118743795764",
+        "maxDepositShortDelay": "118743795764",
+        "recommendedDepositInstant": "118743795764"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "99890265",
+      "inputToken": {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "symbol": "USDC",
+        "decimals": 6,
+        "chainId": 1
+      },
+      "outputToken": {
+        "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+        "symbol": "USDG",
+        "decimals": 6,
+        "chainId": 4663
+      },
+      "id": "vsht5-1789124284334-b2ba6f011cc4"
+    },
+    "observedAt": "2026-09-11T10:58:04.622961+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 1,
+      "originToken": "0xe343167631d89B6Ffc58B88d6b7fB0228795491D",
+      "destinationChainId": 4663,
+      "destinationToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "originTokenSymbol": "USDG-MAINNET",
+      "destinationTokenSymbol": "USDG",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0xe343167631d89B6Ffc58B88d6b7fB0228795491D",
+      "outputToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "originChainId": 1,
+      "destinationChainId": 4663,
+      "amount": "100000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 2,
+      "capitalFeePct": "100000000000000",
+      "capitalFeeTotal": "10000",
+      "relayGasFeePct": "397650000000000",
+      "relayGasFeeTotal": "39765",
+      "relayFeePct": "847650000000000",
+      "relayFeeTotal": "84747",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+      "exclusivityDeadline": 1789124309,
+      "spokePoolAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "847650000000000",
+        "total": "84747"
+      },
+      "relayerCapitalFee": {
+        "pct": "100000000000000",
+        "total": "10000"
+      },
+      "relayerGasFee": {
+        "pct": "397650000000000",
+        "total": "39765"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "350000000000000",
+        "total": "34982"
+      },
+      "limits": {
+        "minDeposit": "500106",
+        "maxDeposit": "118743795764",
+        "maxDepositInstant": "118743795764",
+        "maxDepositShortDelay": "118743795764",
+        "recommendedDepositInstant": "118743795764"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "99915253",
+      "inputToken": {
+        "address": "0xe343167631d89B6Ffc58B88d6b7fB0228795491D",
+        "symbol": "USDG-MAINNET",
+        "decimals": 6,
+        "chainId": 1
+      },
+      "outputToken": {
+        "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+        "symbol": "USDG",
+        "decimals": 6,
+        "chainId": 4663
+      },
+      "id": "kvwhp-1789124284595-4c9a99905792"
+    },
+    "observedAt": "2026-09-11T10:58:04.852974+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 10,
+      "originToken": "0x4200000000000000000000000000000000000006",
+      "destinationChainId": 4663,
+      "destinationToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originTokenSymbol": "WETH",
+      "destinationTokenSymbol": "WETH",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x4200000000000000000000000000000000000006",
+      "outputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originChainId": 10,
+      "destinationChainId": 4663,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "99583333333400",
+      "capitalFeeTotal": "995833333334",
+      "relayGasFeePct": "2524472208030000",
+      "relayGasFeeTotal": "25244722080300",
+      "relayFeePct": "2649039617531408",
+      "relayFeeTotal": "26490396175314",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "2649039617531408",
+        "total": "26490396175314"
+      },
+      "relayerCapitalFee": {
+        "pct": "99583333333400",
+        "total": "995833333334"
+      },
+      "relayerGasFee": {
+        "pct": "2524472208030000",
+        "total": "25244722080300"
+      },
+      "lpFee": {
+        "pct": "24984076168008",
+        "total": "249840761680"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "287582733360999395843",
+        "maxDepositInstant": "287582733360999395843",
+        "maxDepositShortDelay": "287582733360999395843",
+        "recommendedDepositInstant": "287582733360999395843"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9973509603824686",
+      "inputToken": {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 10
+      },
+      "outputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "id": "z724l-1789124284677-c3f209d3a68d"
+    },
+    "observedAt": "2026-09-11T10:58:05.120986+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 10,
+      "originToken": "0x4200000000000000000000000000000000000006",
+      "destinationChainId": 4663,
+      "destinationToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originTokenSymbol": "ETH",
+      "destinationTokenSymbol": "ETH",
+      "isNative": true
+    },
+    "request": {
+      "inputToken": "0x4200000000000000000000000000000000000006",
+      "outputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originChainId": 10,
+      "destinationChainId": 4663,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "99583333333400",
+      "capitalFeeTotal": "995833333334",
+      "relayGasFeePct": "2524472208030000",
+      "relayGasFeeTotal": "25244722080300",
+      "relayFeePct": "2649039617531408",
+      "relayFeeTotal": "26490396175314",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "2649039617531408",
+        "total": "26490396175314"
+      },
+      "relayerCapitalFee": {
+        "pct": "99583333333400",
+        "total": "995833333334"
+      },
+      "relayerGasFee": {
+        "pct": "2524472208030000",
+        "total": "25244722080300"
+      },
+      "lpFee": {
+        "pct": "24984076168008",
+        "total": "249840761680"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "287582733360999395843",
+        "maxDepositInstant": "287582733360999395843",
+        "maxDepositShortDelay": "287582733360999395843",
+        "recommendedDepositInstant": "287582733360999395843"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9973509603824686",
+      "inputToken": {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 10
+      },
+      "outputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "id": "wwlm6-1789124284691-94f9a82c0086"
+    },
+    "observedAt": "2026-09-11T10:58:05.080286+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 10,
+      "originToken": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+      "destinationChainId": 4663,
+      "destinationToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "originTokenSymbol": "USDC",
+      "destinationTokenSymbol": "USDG",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+      "outputToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "originChainId": 10,
+      "destinationChainId": 4663,
+      "amount": "100000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "100000000000000",
+      "capitalFeeTotal": "10000",
+      "relayGasFeePct": "397650000000000",
+      "relayGasFeeTotal": "39765",
+      "relayFeePct": "997650000000000",
+      "relayFeeTotal": "99740",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "997650000000000",
+        "total": "99740"
+      },
+      "relayerCapitalFee": {
+        "pct": "100000000000000",
+        "total": "10000"
+      },
+      "relayerGasFee": {
+        "pct": "397650000000000",
+        "total": "39765"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "500000000000000",
+        "total": "49975"
+      },
+      "limits": {
+        "minDeposit": "500106",
+        "maxDeposit": "118743795764",
+        "maxDepositInstant": "118743795764",
+        "maxDepositShortDelay": "118743795764",
+        "recommendedDepositInstant": "118743795764"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "99900260",
+      "inputToken": {
+        "address": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+        "symbol": "USDC",
+        "decimals": 6,
+        "chainId": 10
+      },
+      "outputToken": {
+        "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+        "symbol": "USDG",
+        "decimals": 6,
+        "chainId": 4663
+      },
+      "id": "zk95k-1789124285003-882eb930f8d6"
+    },
+    "observedAt": "2026-09-11T10:58:05.421976+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 42161,
+      "originToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "destinationChainId": 4663,
+      "destinationToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "originTokenSymbol": "USDC",
+      "destinationTokenSymbol": "USDG",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "outputToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "originChainId": 42161,
+      "destinationChainId": 4663,
+      "amount": "100000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "100000000000000",
+      "capitalFeeTotal": "10000",
+      "relayGasFeePct": "397650000000000",
+      "relayGasFeeTotal": "39765",
+      "relayFeePct": "997650000000000",
+      "relayFeeTotal": "99740",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "997650000000000",
+        "total": "99740"
+      },
+      "relayerCapitalFee": {
+        "pct": "100000000000000",
+        "total": "10000"
+      },
+      "relayerGasFee": {
+        "pct": "397650000000000",
+        "total": "39765"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "500000000000000",
+        "total": "49975"
+      },
+      "limits": {
+        "minDeposit": "500106",
+        "maxDeposit": "118743795764",
+        "maxDepositInstant": "118743795764",
+        "maxDepositShortDelay": "118743795764",
+        "recommendedDepositInstant": "118743795764"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "99900260",
+      "inputToken": {
+        "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "symbol": "USDC",
+        "decimals": 6,
+        "chainId": 42161
+      },
+      "outputToken": {
+        "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+        "symbol": "USDG",
+        "decimals": 6,
+        "chainId": 4663
+      },
+      "id": "6t289-1789124285230-02b3b1a95492"
+    },
+    "observedAt": "2026-09-11T10:58:05.636774+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 42161,
+      "originToken": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "destinationChainId": 4663,
+      "destinationToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originTokenSymbol": "WETH",
+      "destinationTokenSymbol": "WETH",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "outputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originChainId": 42161,
+      "destinationChainId": 4663,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "99583333333400",
+      "capitalFeeTotal": "995833333334",
+      "relayGasFeePct": "2524472208030000",
+      "relayGasFeeTotal": "25244722080300",
+      "relayFeePct": "2649039617531408",
+      "relayFeeTotal": "26490396175314",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "2649039617531408",
+        "total": "26490396175314"
+      },
+      "relayerCapitalFee": {
+        "pct": "99583333333400",
+        "total": "995833333334"
+      },
+      "relayerGasFee": {
+        "pct": "2524472208030000",
+        "total": "25244722080300"
+      },
+      "lpFee": {
+        "pct": "24984076168008",
+        "total": "249840761680"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "287582733360999395843",
+        "maxDepositInstant": "287582733360999395843",
+        "maxDepositShortDelay": "287582733360999395843",
+        "recommendedDepositInstant": "287582733360999395843"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9973509603824686",
+      "inputToken": {
+        "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 42161
+      },
+      "outputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "id": "9ls7m-1789124285212-394d69393a1c"
+    },
+    "observedAt": "2026-09-11T10:58:05.369684+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 42161,
+      "originToken": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "destinationChainId": 4663,
+      "destinationToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originTokenSymbol": "ETH",
+      "destinationTokenSymbol": "ETH",
+      "isNative": true
+    },
+    "request": {
+      "inputToken": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "outputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originChainId": 42161,
+      "destinationChainId": 4663,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "99583333333400",
+      "capitalFeeTotal": "995833333334",
+      "relayGasFeePct": "2524472208030000",
+      "relayGasFeeTotal": "25244722080300",
+      "relayFeePct": "2649039617531408",
+      "relayFeeTotal": "26490396175314",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "2649039617531408",
+        "total": "26490396175314"
+      },
+      "relayerCapitalFee": {
+        "pct": "99583333333400",
+        "total": "995833333334"
+      },
+      "relayerGasFee": {
+        "pct": "2524472208030000",
+        "total": "25244722080300"
+      },
+      "lpFee": {
+        "pct": "24984076168008",
+        "total": "249840761680"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "287582733360999395843",
+        "maxDepositInstant": "287582733360999395843",
+        "maxDepositShortDelay": "287582733360999395843",
+        "recommendedDepositInstant": "287582733360999395843"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9973509603824686",
+      "inputToken": {
+        "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 42161
+      },
+      "outputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "id": "9xhns-1789124285462-273c962cb4dc"
+    },
+    "observedAt": "2026-09-11T10:58:05.548027+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 8453,
+      "originToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "destinationChainId": 4663,
+      "destinationToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "originTokenSymbol": "USDC",
+      "destinationTokenSymbol": "USDG",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "outputToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "originChainId": 8453,
+      "destinationChainId": 4663,
+      "amount": "100000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "100000000000000",
+      "capitalFeeTotal": "10000",
+      "relayGasFeePct": "397650000000000",
+      "relayGasFeeTotal": "39765",
+      "relayFeePct": "997650000000000",
+      "relayFeeTotal": "99740",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "997650000000000",
+        "total": "99740"
+      },
+      "relayerCapitalFee": {
+        "pct": "100000000000000",
+        "total": "10000"
+      },
+      "relayerGasFee": {
+        "pct": "397650000000000",
+        "total": "39765"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "500000000000000",
+        "total": "49975"
+      },
+      "limits": {
+        "minDeposit": "500106",
+        "maxDeposit": "118743795764",
+        "maxDepositInstant": "118743795764",
+        "maxDepositShortDelay": "118743795764",
+        "recommendedDepositInstant": "118743795764"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "99900260",
+      "inputToken": {
+        "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "symbol": "USDC",
+        "decimals": 6,
+        "chainId": 8453
+      },
+      "outputToken": {
+        "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+        "symbol": "USDG",
+        "decimals": 6,
+        "chainId": 4663
+      },
+      "id": "x5nh4-1789124285513-881a74649020"
+    },
+    "observedAt": "2026-09-11T10:58:05.601909+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 8453,
+      "originToken": "0x4200000000000000000000000000000000000006",
+      "destinationChainId": 4663,
+      "destinationToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originTokenSymbol": "WETH",
+      "destinationTokenSymbol": "WETH",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x4200000000000000000000000000000000000006",
+      "outputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originChainId": 8453,
+      "destinationChainId": 4663,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "99583333333400",
+      "capitalFeeTotal": "995833333334",
+      "relayGasFeePct": "2524472208030000",
+      "relayGasFeeTotal": "25244722080300",
+      "relayFeePct": "2649039617531408",
+      "relayFeeTotal": "26490396175314",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xaD03abC6223e9DEf79B3Feb624F54303A372f0c7",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "2649039617531408",
+        "total": "26490396175314"
+      },
+      "relayerCapitalFee": {
+        "pct": "99583333333400",
+        "total": "995833333334"
+      },
+      "relayerGasFee": {
+        "pct": "2524472208030000",
+        "total": "25244722080300"
+      },
+      "lpFee": {
+        "pct": "24984076168008",
+        "total": "249840761680"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "287582733360999395843",
+        "maxDepositInstant": "287582733360999395843",
+        "maxDepositShortDelay": "287582733360999395843",
+        "recommendedDepositInstant": "287582733360999395843"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9973509603824686",
+      "inputToken": {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 8453
+      },
+      "outputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "id": "nnhl6-1789124285620-1ed3e57ba188"
+    },
+    "observedAt": "2026-09-11T10:58:05.777664+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 8453,
+      "originToken": "0x4200000000000000000000000000000000000006",
+      "destinationChainId": 4663,
+      "destinationToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originTokenSymbol": "ETH",
+      "destinationTokenSymbol": "ETH",
+      "isNative": true
+    },
+    "request": {
+      "inputToken": "0x4200000000000000000000000000000000000006",
+      "outputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "originChainId": 8453,
+      "destinationChainId": 4663,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "99583333333400",
+      "capitalFeeTotal": "995833333334",
+      "relayGasFeePct": "2524472208030000",
+      "relayGasFeeTotal": "25244722080300",
+      "relayFeePct": "2649039617531408",
+      "relayFeeTotal": "26490396175314",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "destinationSpokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "totalRelayFee": {
+        "pct": "2649039617531408",
+        "total": "26490396175314"
+      },
+      "relayerCapitalFee": {
+        "pct": "99583333333400",
+        "total": "995833333334"
+      },
+      "relayerGasFee": {
+        "pct": "2524472208030000",
+        "total": "25244722080300"
+      },
+      "lpFee": {
+        "pct": "24984076168008",
+        "total": "249840761680"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "287582733360999395843",
+        "maxDepositInstant": "287582733360999395843",
+        "maxDepositShortDelay": "287582733360999395843",
+        "recommendedDepositInstant": "287582733360999395843"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9973509603824686",
+      "inputToken": {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 8453
+      },
+      "outputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "id": "vxqvz-1789124285698-2823f00dd4ed"
+    },
+    "observedAt": "2026-09-11T10:58:05.905518+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "destinationChainId": 1,
+      "destinationToken": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "originTokenSymbol": "USDG",
+      "destinationTokenSymbol": "USDC",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "outputToken": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "originChainId": 4663,
+      "destinationChainId": 1,
+      "amount": "100000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 5,
+      "capitalFeePct": "100000000000000",
+      "capitalFeeTotal": "10000",
+      "relayGasFeePct": "175980000000000",
+      "relayGasFeeTotal": "17598",
+      "relayFeePct": "875980000000000",
+      "relayFeeTotal": "87581",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+      "exclusivityDeadline": 16,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "totalRelayFee": {
+        "pct": "875980000000000",
+        "total": "87581"
+      },
+      "relayerCapitalFee": {
+        "pct": "100000000000000",
+        "total": "10000"
+      },
+      "relayerGasFee": {
+        "pct": "175980000000000",
+        "total": "17598"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "600000000000000",
+        "total": "59983"
+      },
+      "limits": {
+        "minDeposit": "500106",
+        "maxDeposit": "444305155076",
+        "maxDepositInstant": "444305155076",
+        "maxDepositShortDelay": "444305155076",
+        "recommendedDepositInstant": "444305155076"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "99912419",
+      "inputToken": {
+        "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+        "symbol": "USDG",
+        "decimals": 6,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "symbol": "USDC",
+        "decimals": 6,
+        "chainId": 1
+      },
+      "id": "xnwqc-1789124285718-39f097ec865e"
+    },
+    "observedAt": "2026-09-11T10:58:06.101615+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "destinationChainId": 1,
+      "destinationToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "originTokenSymbol": "WETH",
+      "destinationTokenSymbol": "WETH",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "outputToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "originChainId": 4663,
+      "destinationChainId": 1,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 7,
+      "capitalFeePct": "280520000000000",
+      "capitalFeeTotal": "2805200000000",
+      "relayGasFeePct": "977738256844600",
+      "relayGasFeeTotal": "9777382568446",
+      "relayFeePct": "1258258256844600",
+      "relayFeeTotal": "12582582568446",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 12,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "totalRelayFee": {
+        "pct": "1258258256844600",
+        "total": "12582582568446"
+      },
+      "relayerCapitalFee": {
+        "pct": "280520000000000",
+        "total": "2805200000000"
+      },
+      "relayerGasFee": {
+        "pct": "977738256844600",
+        "total": "9777382568446"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "9126123020138311463",
+        "maxDepositInstant": "9126123020138311463",
+        "maxDepositShortDelay": "9126123020138311463",
+        "recommendedDepositInstant": "9126123020138311463"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9987417417431554",
+      "inputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 1
+      },
+      "id": "s2sw5-1789124285890-71406b735374"
+    },
+    "observedAt": "2026-09-11T10:58:05.991360+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "destinationChainId": 1,
+      "destinationToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "originTokenSymbol": "ETH",
+      "destinationTokenSymbol": "ETH",
+      "isNative": true
+    },
+    "request": {
+      "inputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "outputToken": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "originChainId": 4663,
+      "destinationChainId": 1,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 7,
+      "capitalFeePct": "280520000000000",
+      "capitalFeeTotal": "2805200000000",
+      "relayGasFeePct": "977738256844600",
+      "relayGasFeeTotal": "9777382568446",
+      "relayFeePct": "1258258256844600",
+      "relayFeeTotal": "12582582568446",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+      "exclusivityDeadline": 12,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5",
+      "totalRelayFee": {
+        "pct": "1258258256844600",
+        "total": "12582582568446"
+      },
+      "relayerCapitalFee": {
+        "pct": "280520000000000",
+        "total": "2805200000000"
+      },
+      "relayerGasFee": {
+        "pct": "977738256844600",
+        "total": "9777382568446"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "9126123020138311463",
+        "maxDepositInstant": "9126123020138311463",
+        "maxDepositShortDelay": "9126123020138311463",
+        "recommendedDepositInstant": "9126123020138311463"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9987417417431554",
+      "inputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 1
+      },
+      "id": "lt7sl-1789124285976-faccc164956c"
+    },
+    "observedAt": "2026-09-11T10:58:06.057391+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "destinationChainId": 10,
+      "destinationToken": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+      "originTokenSymbol": "USDG",
+      "destinationTokenSymbol": "USDC",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "outputToken": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+      "originChainId": 4663,
+      "destinationChainId": 10,
+      "amount": "100000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 2,
+      "capitalFeePct": "100000000000000",
+      "capitalFeeTotal": "10000",
+      "relayGasFeePct": "2540000000000",
+      "relayGasFeeTotal": "254",
+      "relayFeePct": "602540000000000",
+      "relayFeeTotal": "60248",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
+      "totalRelayFee": {
+        "pct": "602540000000000",
+        "total": "60248"
+      },
+      "relayerCapitalFee": {
+        "pct": "100000000000000",
+        "total": "10000"
+      },
+      "relayerGasFee": {
+        "pct": "2540000000000",
+        "total": "254"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "500000000000000",
+        "total": "49994"
+      },
+      "limits": {
+        "minDeposit": "500106",
+        "maxDeposit": "467795145132",
+        "maxDepositInstant": "23489990055",
+        "maxDepositShortDelay": "467795145132",
+        "recommendedDepositInstant": "23489990055"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "99939752",
+      "inputToken": {
+        "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+        "symbol": "USDG",
+        "decimals": 6,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+        "symbol": "USDC",
+        "decimals": 6,
+        "chainId": 10
+      },
+      "id": "qqn2s-1789124286062-37992822235c"
+    },
+    "observedAt": "2026-09-11T10:58:06.477038+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "destinationChainId": 10,
+      "destinationToken": "0x4200000000000000000000000000000000000006",
+      "originTokenSymbol": "WETH",
+      "destinationTokenSymbol": "WETH",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "outputToken": "0x4200000000000000000000000000000000000006",
+      "originChainId": 4663,
+      "destinationChainId": 10,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "280520000000000",
+      "capitalFeeTotal": "2805200000000",
+      "relayGasFeePct": "14014532516900",
+      "relayGasFeeTotal": "140145325169",
+      "relayFeePct": "294534532516900",
+      "relayFeeTotal": "2945345325169",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
+      "totalRelayFee": {
+        "pct": "294534532516900",
+        "total": "2945345325169"
+      },
+      "relayerCapitalFee": {
+        "pct": "280520000000000",
+        "total": "2805200000000"
+      },
+      "relayerGasFee": {
+        "pct": "14014532516900",
+        "total": "140145325169"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "9126123020138311463",
+        "maxDepositInstant": "9126123020138311463",
+        "maxDepositShortDelay": "9126123020138311463",
+        "recommendedDepositInstant": "9126123020138311463"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9997054654674831",
+      "inputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 10
+      },
+      "id": "rjvs5-1789124286113-57185df39861"
+    },
+    "observedAt": "2026-09-11T10:58:06.486561+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "destinationChainId": 10,
+      "destinationToken": "0x4200000000000000000000000000000000000006",
+      "originTokenSymbol": "ETH",
+      "destinationTokenSymbol": "ETH",
+      "isNative": true
+    },
+    "request": {
+      "inputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "outputToken": "0x4200000000000000000000000000000000000006",
+      "originChainId": 4663,
+      "destinationChainId": 10,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "280520000000000",
+      "capitalFeeTotal": "2805200000000",
+      "relayGasFeePct": "14014532516900",
+      "relayGasFeeTotal": "140145325169",
+      "relayFeePct": "294534532516900",
+      "relayFeeTotal": "2945345325169",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xaD03abC6223e9DEf79B3Feb624F54303A372f0c7",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0x6f26Bf09B1C792e3228e5467807a900A503c0281",
+      "totalRelayFee": {
+        "pct": "294534532516900",
+        "total": "2945345325169"
+      },
+      "relayerCapitalFee": {
+        "pct": "280520000000000",
+        "total": "2805200000000"
+      },
+      "relayerGasFee": {
+        "pct": "14014532516900",
+        "total": "140145325169"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "9126123020138311463",
+        "maxDepositInstant": "9126123020138311463",
+        "maxDepositShortDelay": "9126123020138311463",
+        "recommendedDepositInstant": "9126123020138311463"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9997054654674831",
+      "inputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 10
+      },
+      "id": "qf7xr-1789124286163-f23140b4303f"
+    },
+    "observedAt": "2026-09-11T10:58:06.504979+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "destinationChainId": 42161,
+      "destinationToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "originTokenSymbol": "USDG",
+      "destinationTokenSymbol": "USDC",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "outputToken": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+      "originChainId": 4663,
+      "destinationChainId": 42161,
+      "amount": "100000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 2,
+      "capitalFeePct": "100000000000000",
+      "capitalFeeTotal": "10000",
+      "relayGasFeePct": "70570000000000",
+      "relayGasFeeTotal": "7057",
+      "relayFeePct": "670570000000000",
+      "relayFeeTotal": "67048",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+      "totalRelayFee": {
+        "pct": "670570000000000",
+        "total": "67048"
+      },
+      "relayerCapitalFee": {
+        "pct": "100000000000000",
+        "total": "10000"
+      },
+      "relayerGasFee": {
+        "pct": "70570000000000",
+        "total": "7057"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "500000000000000",
+        "total": "49991"
+      },
+      "limits": {
+        "minDeposit": "500106",
+        "maxDeposit": "534673677812",
+        "maxDepositInstant": "90368522736",
+        "maxDepositShortDelay": "534673677812",
+        "recommendedDepositInstant": "90368522736"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "99932952",
+      "inputToken": {
+        "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+        "symbol": "USDG",
+        "decimals": 6,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        "symbol": "USDC",
+        "decimals": 6,
+        "chainId": 42161
+      },
+      "id": "bzfdw-1789124286564-c8849b38fbb1"
+    },
+    "observedAt": "2026-09-11T10:58:06.959375+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "destinationChainId": 42161,
+      "destinationToken": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "originTokenSymbol": "WETH",
+      "destinationTokenSymbol": "WETH",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "outputToken": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "originChainId": 4663,
+      "destinationChainId": 42161,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "280520000000000",
+      "capitalFeeTotal": "2805200000000",
+      "relayGasFeePct": "446940298233700",
+      "relayGasFeeTotal": "4469402982337",
+      "relayFeePct": "727460298233700",
+      "relayFeeTotal": "7274602982337",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xaD03abC6223e9DEf79B3Feb624F54303A372f0c7",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+      "totalRelayFee": {
+        "pct": "727460298233700",
+        "total": "7274602982337"
+      },
+      "relayerCapitalFee": {
+        "pct": "280520000000000",
+        "total": "2805200000000"
+      },
+      "relayerGasFee": {
+        "pct": "446940298233700",
+        "total": "4469402982337"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "9126123020138311463",
+        "maxDepositInstant": "9126123020138311463",
+        "maxDepositShortDelay": "9126123020138311463",
+        "recommendedDepositInstant": "9126123020138311463"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9992725397017663",
+      "inputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 42161
+      },
+      "id": "kg2tm-1789124286576-0ed54a5ad085"
+    },
+    "observedAt": "2026-09-11T10:58:06.958628+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "destinationChainId": 42161,
+      "destinationToken": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "originTokenSymbol": "ETH",
+      "destinationTokenSymbol": "ETH",
+      "isNative": true
+    },
+    "request": {
+      "inputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "outputToken": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      "originChainId": 4663,
+      "destinationChainId": 42161,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "280520000000000",
+      "capitalFeeTotal": "2805200000000",
+      "relayGasFeePct": "446940298233700",
+      "relayGasFeeTotal": "4469402982337",
+      "relayFeePct": "727460298233700",
+      "relayFeeTotal": "7274602982337",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+      "totalRelayFee": {
+        "pct": "727460298233700",
+        "total": "7274602982337"
+      },
+      "relayerCapitalFee": {
+        "pct": "280520000000000",
+        "total": "2805200000000"
+      },
+      "relayerGasFee": {
+        "pct": "446940298233700",
+        "total": "4469402982337"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "9126123020138311463",
+        "maxDepositInstant": "9126123020138311463",
+        "maxDepositShortDelay": "9126123020138311463",
+        "recommendedDepositInstant": "9126123020138311463"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9992725397017663",
+      "inputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 42161
+      },
+      "id": "8p7c2-1789124286580-ffc28e5f0e5d"
+    },
+    "observedAt": "2026-09-11T10:58:06.973768+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "destinationChainId": 8453,
+      "destinationToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "originTokenSymbol": "USDG",
+      "destinationTokenSymbol": "USDC",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+      "outputToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "originChainId": 4663,
+      "destinationChainId": 8453,
+      "amount": "100000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 2,
+      "capitalFeePct": "100000000000000",
+      "capitalFeeTotal": "10000",
+      "relayGasFeePct": "33680000000000",
+      "relayGasFeeTotal": "3368",
+      "relayFeePct": "633680000000000",
+      "relayFeeTotal": "63361",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xeF1eC136931Ab5728B0783FD87D109c9D15D31F1",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "totalRelayFee": {
+        "pct": "633680000000000",
+        "total": "63361"
+      },
+      "relayerCapitalFee": {
+        "pct": "100000000000000",
+        "total": "10000"
+      },
+      "relayerGasFee": {
+        "pct": "33680000000000",
+        "total": "3368"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "500000000000000",
+        "total": "49993"
+      },
+      "limits": {
+        "minDeposit": "500106",
+        "maxDeposit": "551586296170",
+        "maxDepositInstant": "107281141093",
+        "maxDepositShortDelay": "551586296170",
+        "recommendedDepositInstant": "107281141093"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "99936639",
+      "inputToken": {
+        "address": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+        "symbol": "USDG",
+        "decimals": 6,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "symbol": "USDC",
+        "decimals": 6,
+        "chainId": 8453
+      },
+      "id": "mb6rb-1789124287061-fd85ab09366a"
+    },
+    "observedAt": "2026-09-11T10:58:07.228420+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "destinationChainId": 8453,
+      "destinationToken": "0x4200000000000000000000000000000000000006",
+      "originTokenSymbol": "WETH",
+      "destinationTokenSymbol": "WETH",
+      "isNative": false
+    },
+    "request": {
+      "inputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "outputToken": "0x4200000000000000000000000000000000000006",
+      "originChainId": 4663,
+      "destinationChainId": 8453,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "280520000000000",
+      "capitalFeeTotal": "2805200000000",
+      "relayGasFeePct": "186583795473100",
+      "relayGasFeeTotal": "1865837954731",
+      "relayFeePct": "467103795473100",
+      "relayFeeTotal": "4671037954731",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0xFD03AbCAdaF3F930fA4E37Eb2f6ea3A44a41b7F0",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "totalRelayFee": {
+        "pct": "467103795473100",
+        "total": "4671037954731"
+      },
+      "relayerCapitalFee": {
+        "pct": "280520000000000",
+        "total": "2805200000000"
+      },
+      "relayerGasFee": {
+        "pct": "186583795473100",
+        "total": "1865837954731"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "9126123020138311463",
+        "maxDepositInstant": "9126123020138311463",
+        "maxDepositShortDelay": "9126123020138311463",
+        "recommendedDepositInstant": "9126123020138311463"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9995328962045269",
+      "inputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 8453
+      },
+      "id": "vcgwt-1789124287047-ddaef7bb0bb5"
+    },
+    "observedAt": "2026-09-11T10:58:07.298266+00:00"
+  },
+  {
+    "route": {
+      "originChainId": 4663,
+      "originToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "destinationChainId": 8453,
+      "destinationToken": "0x4200000000000000000000000000000000000006",
+      "originTokenSymbol": "ETH",
+      "destinationTokenSymbol": "ETH",
+      "isNative": true
+    },
+    "request": {
+      "inputToken": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+      "outputToken": "0x4200000000000000000000000000000000000006",
+      "originChainId": 4663,
+      "destinationChainId": 8453,
+      "amount": "10000000000000000"
+    },
+    "response": {
+      "estimatedFillTimeSec": 1,
+      "capitalFeePct": "280520000000000",
+      "capitalFeeTotal": "2805200000000",
+      "relayGasFeePct": "186583795473100",
+      "relayGasFeeTotal": "1865837954731",
+      "relayFeePct": "467103795473100",
+      "relayFeeTotal": "4671037954731",
+      "lpFeePct": "0",
+      "timestamp": "1789124147",
+      "isAmountTooLow": false,
+      "quoteBlock": "25953700",
+      "exclusiveRelayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+      "exclusivityDeadline": 3,
+      "spokePoolAddress": "0xD29C85F15DF544bA632C9E25829fd29d767d7978",
+      "destinationSpokePoolAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+      "totalRelayFee": {
+        "pct": "467103795473100",
+        "total": "4671037954731"
+      },
+      "relayerCapitalFee": {
+        "pct": "280520000000000",
+        "total": "2805200000000"
+      },
+      "relayerGasFee": {
+        "pct": "186583795473100",
+        "total": "1865837954731"
+      },
+      "lpFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "internalizedSwapFee": {
+        "pct": "0",
+        "total": "0"
+      },
+      "limits": {
+        "minDeposit": "202802733780851",
+        "maxDeposit": "9126123020138311463",
+        "maxDepositInstant": "9126123020138311463",
+        "maxDepositShortDelay": "9126123020138311463",
+        "recommendedDepositInstant": "9126123020138311463"
+      },
+      "fillDeadline": "1789131347",
+      "outputAmount": "9995328962045269",
+      "inputToken": {
+        "address": "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 4663
+      },
+      "outputToken": {
+        "address": "0x4200000000000000000000000000000000000006",
+        "symbol": "WETH",
+        "decimals": 18,
+        "chainId": 8453
+      },
+      "id": "lqw7j-1789124287129-d89b2d922641"
+    },
+    "observedAt": "2026-09-11T10:58:07.277772+00:00"
+  }
+]

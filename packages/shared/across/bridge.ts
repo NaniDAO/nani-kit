@@ -63,6 +63,15 @@ export const getAcrossFeeQuote=createTool({name:'getAcrossFeeQuote',supportedCha
   if(quote.isAmountTooLow===true || quote.isAmountTooHigh===true || quote.isLiquidityInsufficient===true) throw new Error('Across cannot fill this amount');
   const fee=integer(quote.totalRelayFee?.total,'bridge fee');
   if(fee>=inputAmount) throw new Error('Fee consumes the input amount');
+  // Cross-symbol routes (USDC/USDG) include conversion costs in totalRelayFee.
+  // Bind the API's explicit payout and deployment identity; never infer a swap rate.
+  const outputAmount=integer(quote.outputAmount,'output amount');
+  if(outputAmount<=0n || outputAmount+fee!==inputAmount) throw new Error('Across output amount and total fee do not reconcile');
+  if(address.parse(quote.spokePoolAddress).toLowerCase()!==ACROSS_SPOKE_POOL_ADDRESS[args.originChainId].toLowerCase() ||
+     address.parse(quote.destinationSpokePoolAddress).toLowerCase()!==ACROSS_SPOKE_POOL_ADDRESS[args.destinationChainId].toLowerCase()) throw new Error('Across quote deployment mismatch');
+  for(const [metadata,token,chainId,decimals] of [[quote.inputToken,args.inputToken,args.originChainId,inputDecimals],[quote.outputToken,args.outputToken,args.destinationChainId,outputDecimals]] as const) {
+    if(!metadata || address.parse(metadata.address).toLowerCase()!==token.toLowerCase() || metadata.chainId!==chainId || metadata.decimals!==decimals) throw new Error('Across quote token identity mismatch');
+  }
   const uint32=(v:unknown,name:string)=> {const n=typeof v==='string' && /^[0-9]+$/.test(v)?Number(v):v;if(typeof n!=='number'||!Number.isInteger(n)||n<0||n>4294967295)throw new Error(`Invalid ${name}`);return n;};
   const timestamp=uint32(quote.timestamp,'quote timestamp'),now=Math.floor(Date.now()/1000);
   // Across suggested-fees may omit fillDeadline. Construct a bounded absolute deadline.
@@ -72,7 +81,7 @@ export const getAcrossFeeQuote=createTool({name:'getAcrossFeeQuote',supportedCha
   const exclusivityDeadline=uint32(quote.exclusivityDeadline,'exclusivity deadline');
   const eta=quote.estimatedFillTimeSec===undefined?null:uint32(quote.estimatedFillTimeSec,'estimated arrival');
   return {schemaVersion:1,source:'https://across.to/api/suggested-fees',observedAt:new Date().toISOString(),...args,route,
-    inputDecimals,outputDecimals,inputAmountRaw:inputAmount.toString(),outputAmountRaw:(inputAmount-fee).toString(),feeRaw:fee.toString(),
+    inputDecimals,outputDecimals,inputAmountRaw:inputAmount.toString(),outputAmountRaw:outputAmount.toString(),feeRaw:fee.toString(),
     spokePool:ACROSS_SPOKE_POOL_ADDRESS[args.originChainId],destinationSpokePool:ACROSS_SPOKE_POOL_ADDRESS[args.destinationChainId],
     timestamp,fillDeadline,exclusiveRelayer,exclusivityDeadline,estimatedFillSeconds:eta,expiresAt:Math.min(timestamp+120,now+60),
     warning:'Source confirmation is not destination arrival. Gas is separate from bridge fees.'};
